@@ -29,8 +29,7 @@ const Index = () => {
           </p>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Notre plateforme vous permet d'investir dans des collections de vêtements de luxe
-            et de bénéficier de rendements attractifs. Choisissez parmi nos différents packs
-            d'investissement et commencez à faire fructifier votre capital.
+            et de bénéficier de rendements attractifs.
           </p>
         </div>
 
@@ -67,16 +66,16 @@ const Index = () => {
                 Rendements Attractifs
               </h3>
               <p className="text-gray-600">
-                Bénéficiez de rendements optimisés grâce à notre expertise du marché du luxe et notre stratégie d'investissement éprouvée.
+                Des rendements optimisés grâce à notre expertise du marché du luxe.
               </p>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-3">
                 <span role="img" aria-label="shield" className="mr-2">🛡️</span>
-                Sécurité Maximale
+                Sécurité
               </h3>
               <p className="text-gray-600">
-                Vos investissements sont sécurisés et gérés par des professionnels du secteur. Nous garantissons une transparence totale.
+                Vos investissements sont sécurisés et gérés par des professionnels.
               </p>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-md">
@@ -85,7 +84,7 @@ const Index = () => {
                 Flexibilité
               </h3>
               <p className="text-gray-600">
-                Adaptez votre stratégie d'investissement selon vos objectifs. Choisissez le pack qui correspond le mieux à vos besoins.
+                Choisissez le pack qui correspond le mieux à vos besoins.
               </p>
             </div>
           </div>
