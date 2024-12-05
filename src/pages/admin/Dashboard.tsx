@@ -11,10 +11,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'users' | 'packs' | 'transactions'>('users');
+  const [newUser, setNewUser] = useState({ firstName: '', lastName: '', email: '', password: '', address: '' });
+  const [newPack, setNewPack] = useState({ name: '', minAmount: 0, returnRate: 0 });
+  const [newTransaction, setNewTransaction] = useState({ userId: '', amount: 0 });
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
@@ -23,7 +30,7 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
-  const { data: users } = useQuery({
+  const { data: users, refetch: refetchUsers } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -34,7 +41,7 @@ const AdminDashboard = () => {
     },
   });
 
-  const { data: packs } = useQuery({
+  const { data: packs, refetch: refetchPacks } = useQuery({
     queryKey: ['admin-packs'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -59,6 +66,79 @@ const AdminDashboard = () => {
       return data;
     },
   });
+
+  const handleCreateUser = async () => {
+    try {
+      // Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newUser.email,
+        password: newUser.password,
+      });
+
+      if (authError) throw authError;
+
+      // Update profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: newUser.firstName,
+          last_name: newUser.lastName,
+          address: newUser.address,
+        })
+        .eq('id', authData.user?.id);
+
+      if (profileError) throw profileError;
+
+      toast.success("Utilisateur créé avec succès");
+      refetchUsers();
+      setNewUser({ firstName: '', lastName: '', email: '', password: '', address: '' });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast.error("Erreur lors de la création de l'utilisateur");
+    }
+  };
+
+  const handleCreatePack = async () => {
+    try {
+      const { error } = await supabase
+        .from('investment_packs')
+        .insert({
+          name: newPack.name,
+          min_amount: newPack.minAmount,
+          return_rate: newPack.returnRate,
+        });
+
+      if (error) throw error;
+
+      toast.success("Pack d'investissement créé avec succès");
+      refetchPacks();
+      setNewPack({ name: '', minAmount: 0, returnRate: 0 });
+    } catch (error) {
+      console.error('Error creating pack:', error);
+      toast.error("Erreur lors de la création du pack");
+    }
+  };
+
+  const handleAddFunds = async () => {
+    try {
+      const { error } = await supabase
+        .from('investments')
+        .insert({
+          user_id: newTransaction.userId,
+          amount: newTransaction.amount,
+          status: 'completed',
+          payment_method: 'admin',
+        });
+
+      if (error) throw error;
+
+      toast.success("Fonds ajoutés avec succès");
+      setNewTransaction({ userId: '', amount: 0 });
+    } catch (error) {
+      console.error('Error adding funds:', error);
+      toast.error("Erreur lors de l'ajout des fonds");
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("isAdminAuthenticated");
@@ -102,51 +182,177 @@ const AdminDashboard = () => {
 
         <div className="bg-white rounded-lg shadow p-6">
           {activeTab === 'users' && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Prénom</TableHead>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Adresse</TableHead>
-                  <TableHead>Admin</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users?.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-mono">{user.id}</TableCell>
-                    <TableCell>{user.first_name}</TableCell>
-                    <TableCell>{user.last_name}</TableCell>
-                    <TableCell>{user.address}</TableCell>
-                    <TableCell>{user.is_admin ? 'Oui' : 'Non'}</TableCell>
+            <>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="mb-4">Créer un utilisateur</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Créer un nouvel utilisateur</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="firstName">Prénom</Label>
+                      <Input
+                        id="firstName"
+                        value={newUser.firstName}
+                        onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Nom</Label>
+                      <Input
+                        id="lastName"
+                        value={newUser.lastName}
+                        onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="password">Mot de passe</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={newUser.password}
+                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="address">Adresse</Label>
+                      <Input
+                        id="address"
+                        value={newUser.address}
+                        onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
+                      />
+                    </div>
+                    <Button onClick={handleCreateUser}>Créer</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Prénom</TableHead>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Adresse</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {users?.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-mono">{user.id}</TableCell>
+                      <TableCell>{user.first_name}</TableCell>
+                      <TableCell>{user.last_name}</TableCell>
+                      <TableCell>{user.address}</TableCell>
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">Ajouter des fonds</Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Ajouter des fonds</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label htmlFor="amount">Montant</Label>
+                                <Input
+                                  id="amount"
+                                  type="number"
+                                  value={newTransaction.amount}
+                                  onChange={(e) => setNewTransaction({
+                                    userId: user.id,
+                                    amount: parseFloat(e.target.value)
+                                  })}
+                                />
+                              </div>
+                              <Button onClick={handleAddFunds}>Ajouter</Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
           )}
 
           {activeTab === 'packs' && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Montant minimum</TableHead>
-                  <TableHead>Taux de rendement</TableHead>
-                  <TableHead>Actif</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {packs?.map((pack) => (
-                  <TableRow key={pack.id}>
-                    <TableCell>{pack.name}</TableCell>
-                    <TableCell>{pack.min_amount}€</TableCell>
-                    <TableCell>{pack.return_rate}%</TableCell>
-                    <TableCell>{pack.is_active ? 'Oui' : 'Non'}</TableCell>
+            <>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="mb-4">Créer un pack</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Créer un nouveau pack d'investissement</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="packName">Nom</Label>
+                      <Input
+                        id="packName"
+                        value={newPack.name}
+                        onChange={(e) => setNewPack({ ...newPack, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="minAmount">Montant minimum</Label>
+                      <Input
+                        id="minAmount"
+                        type="number"
+                        value={newPack.minAmount}
+                        onChange={(e) => setNewPack({ ...newPack, minAmount: parseFloat(e.target.value) })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="returnRate">Taux de rendement (%)</Label>
+                      <Input
+                        id="returnRate"
+                        type="number"
+                        value={newPack.returnRate}
+                        onChange={(e) => setNewPack({ ...newPack, returnRate: parseFloat(e.target.value) })}
+                      />
+                    </div>
+                    <Button onClick={handleCreatePack}>Créer</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Montant minimum</TableHead>
+                    <TableHead>Taux de rendement</TableHead>
+                    <TableHead>Actif</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {packs?.map((pack) => (
+                    <TableRow key={pack.id}>
+                      <TableCell>{pack.name}</TableCell>
+                      <TableCell>{pack.min_amount}€</TableCell>
+                      <TableCell>{pack.return_rate}%</TableCell>
+                      <TableCell>{pack.is_active ? 'Oui' : 'Non'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
           )}
 
           {activeTab === 'transactions' && (
