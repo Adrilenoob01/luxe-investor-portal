@@ -9,7 +9,149 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      investment_packs: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          min_amount: number
+          name: string
+          return_rate: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          min_amount: number
+          name: string
+          return_rate: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          min_amount?: number
+          name?: string
+          return_rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      investments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          pack_id: string | null
+          payment_method: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          pack_id?: string | null
+          payment_method: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          pack_id?: string | null
+          payment_method?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investments_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "investment_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          first_name: string | null
+          id: string
+          is_admin: boolean | null
+          last_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          first_name?: string | null
+          id: string
+          is_admin?: boolean | null
+          last_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          is_admin?: boolean | null
+          last_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      withdrawals: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
