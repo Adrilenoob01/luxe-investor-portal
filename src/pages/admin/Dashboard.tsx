@@ -55,22 +55,11 @@ const AdminDashboard = () => {
         .select(`
           *,
           profiles:user_id (
-            id,
             first_name,
-            last_name,
-            address,
-            is_admin,
-            created_at,
-            updated_at
+            last_name
           ),
           investment_packs:pack_id (
-            id,
-            name,
-            min_amount,
-            return_rate,
-            is_active,
-            created_at,
-            updated_at
+            name
           )
         `);
       if (error) throw error;
@@ -273,7 +262,7 @@ const AdminDashboard = () => {
                 </DialogContent>
               </Dialog>
 
-              <PacksList packs={packs} />
+              <PacksList packs={packs} refetchPacks={refetchPacks} />
             </>
           )}
 

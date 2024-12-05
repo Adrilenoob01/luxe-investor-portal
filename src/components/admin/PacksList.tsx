@@ -1,4 +1,5 @@
 import { InvestmentPack } from "@/types/supabase";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -7,12 +8,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PacksListProps {
   packs: InvestmentPack[] | null;
+  refetchPacks: () => void;
 }
 
-export const PacksList = ({ packs }: PacksListProps) => {
+export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
+  const handleDeletePack = async (packId: string) => {
+    try {
+      const { error } = await supabase
+        .from('investment_packs')
+        .delete()
+        .eq('id', packId);
+
+      if (error) throw error;
+
+      toast.success("Pack supprimé avec succès");
+      refetchPacks();
+    } catch (error) {
+      console.error('Error deleting pack:', error);
+      toast.error("Erreur lors de la suppression du pack");
+    }
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -21,6 +43,7 @@ export const PacksList = ({ packs }: PacksListProps) => {
           <TableHead>Montant minimum</TableHead>
           <TableHead>Taux de rendement</TableHead>
           <TableHead>Actif</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -30,6 +53,27 @@ export const PacksList = ({ packs }: PacksListProps) => {
             <TableCell>{pack.min_amount}€</TableCell>
             <TableCell>{pack.return_rate}%</TableCell>
             <TableCell>{pack.is_active ? 'Oui' : 'Non'}</TableCell>
+            <TableCell>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">Supprimer</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action est irréversible. Cela supprimera définitivement le pack d'investissement.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeletePack(pack.id)}>
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

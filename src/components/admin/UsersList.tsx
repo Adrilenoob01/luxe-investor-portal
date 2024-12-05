@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface UsersListProps {
   users: Profile[] | null;
@@ -45,6 +46,23 @@ export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast.success("Utilisateur supprimé avec succès");
+      refetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error("Erreur lors de la suppression de l'utilisateur");
+    }
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -63,7 +81,7 @@ export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
             <TableCell>{user.first_name}</TableCell>
             <TableCell>{user.last_name}</TableCell>
             <TableCell>{user.address}</TableCell>
-            <TableCell>
+            <TableCell className="space-x-2">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">Ajouter des fonds</Button>
@@ -89,6 +107,26 @@ export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
                   </div>
                 </DialogContent>
               </Dialog>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">Supprimer</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action est irréversible. Cela supprimera définitivement l'utilisateur et toutes ses données associées.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </TableCell>
           </TableRow>
         ))}
