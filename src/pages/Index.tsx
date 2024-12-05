@@ -62,16 +62,31 @@ const Index = () => {
           <h2 className="text-2xl font-bold mb-4">Pourquoi choisir WearShop Invest ?</h2>
           <div className="grid md:grid-cols-3 gap-8 mt-8">
             <div className="p-6 bg-white rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-3">Rendements Attractifs</h3>
-              <p className="text-gray-600">Des retours sur investissement optimisés grâce à notre expertise du marché du luxe.</p>
+              <h3 className="text-xl font-semibold mb-3">
+                <span role="img" aria-label="chart" className="mr-2">📈</span>
+                Rendements Attractifs
+              </h3>
+              <p className="text-gray-600">
+                Bénéficiez de rendements optimisés grâce à notre expertise du marché du luxe et notre stratégie d'investissement éprouvée.
+              </p>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-3">Sécurité Maximale</h3>
-              <p className="text-gray-600">Vos investissements sont sécurisés et gérés par des professionnels du secteur.</p>
+              <h3 className="text-xl font-semibold mb-3">
+                <span role="img" aria-label="shield" className="mr-2">🛡️</span>
+                Sécurité Maximale
+              </h3>
+              <p className="text-gray-600">
+                Vos investissements sont sécurisés et gérés par des professionnels du secteur. Nous garantissons une transparence totale.
+              </p>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-3">Flexibilité</h3>
-              <p className="text-gray-600">Choisissez le pack qui correspond le mieux à vos objectifs d'investissement.</p>
+              <h3 className="text-xl font-semibold mb-3">
+                <span role="img" aria-label="handshake" className="mr-2">🤝</span>
+                Flexibilité
+              </h3>
+              <p className="text-gray-600">
+                Adaptez votre stratégie d'investissement selon vos objectifs. Choisissez le pack qui correspond le mieux à vos besoins.
+              </p>
             </div>
           </div>
         </div>
