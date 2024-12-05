@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { InvestmentPack } from "@/components/InvestmentPack";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "@/components/Header";
 
 const Index = () => {
   const { data: packs, isLoading } = useQuery({
@@ -19,17 +20,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">WearShop Invest</h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 mb-8">
             Investissez dans le luxe, récoltez les bénéfices
+          </p>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Notre plateforme vous permet d'investir dans des collections de vêtements de luxe
+            et de bénéficier de rendements attractifs. Choisissez parmi nos différents packs
+            d'investissement et commencez à faire fructifier votre capital.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {isLoading ? (
-            // Loading skeletons
             [...Array(3)].map((_, i) => (
               <div key={i} className="space-y-4">
                 <Skeleton className="h-[200px] w-full" />
@@ -50,6 +56,24 @@ const Index = () => {
               />
             ))
           )}
+        </div>
+
+        <div className="mt-16 text-center">
+          <h2 className="text-2xl font-bold mb-4">Pourquoi choisir WearShop Invest ?</h2>
+          <div className="grid md:grid-cols-3 gap-8 mt-8">
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-3">Rendements Attractifs</h3>
+              <p className="text-gray-600">Des retours sur investissement optimisés grâce à notre expertise du marché du luxe.</p>
+            </div>
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-3">Sécurité Maximale</h3>
+              <p className="text-gray-600">Vos investissements sont sécurisés et gérés par des professionnels du secteur.</p>
+            </div>
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-3">Flexibilité</h3>
+              <p className="text-gray-600">Choisissez le pack qui correspond le mieux à vos objectifs d'investissement.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
