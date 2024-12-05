@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import UserDashboard from "./pages/dashboard/Index";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +20,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/dashboard" element={<UserDashboard />} />
