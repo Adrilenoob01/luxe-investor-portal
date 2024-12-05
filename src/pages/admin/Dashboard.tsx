@@ -2,26 +2,21 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { UsersList } from "@/components/admin/UsersList";
+import { PacksList } from "@/components/admin/PacksList";
+import { TransactionsList } from "@/components/admin/TransactionsList";
+import { Profile, InvestmentPack, Investment } from "@/types/supabase";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'users' | 'packs' | 'transactions'>('users');
   const [newUser, setNewUser] = useState({ firstName: '', lastName: '', email: '', password: '', address: '' });
   const [newPack, setNewPack] = useState({ name: '', minAmount: 0, returnRate: 0 });
-  const [newTransaction, setNewTransaction] = useState({ userId: '', amount: 0 });
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
@@ -30,7 +25,7 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
-  const { data: users, refetch: refetchUsers } = useQuery({
+  const { data: users, refetch: refetchUsers } = useQuery<Profile[]>({
     queryKey: ['admin-users'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,7 +36,7 @@ const AdminDashboard = () => {
     },
   });
 
-  const { data: packs, refetch: refetchPacks } = useQuery({
+  const { data: packs, refetch: refetchPacks } = useQuery<InvestmentPack[]>({
     queryKey: ['admin-packs'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -52,7 +47,7 @@ const AdminDashboard = () => {
     },
   });
 
-  const { data: transactions } = useQuery({
+  const { data: transactions } = useQuery<Investment[]>({
     queryKey: ['admin-transactions'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -69,7 +64,6 @@ const AdminDashboard = () => {
 
   const handleCreateUser = async () => {
     try {
-      // Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
@@ -77,7 +71,6 @@ const AdminDashboard = () => {
 
       if (authError) throw authError;
 
-      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -116,27 +109,6 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error creating pack:', error);
       toast.error("Erreur lors de la création du pack");
-    }
-  };
-
-  const handleAddFunds = async () => {
-    try {
-      const { error } = await supabase
-        .from('investments')
-        .insert({
-          user_id: newTransaction.userId,
-          amount: newTransaction.amount,
-          status: 'completed',
-          payment_method: 'admin',
-        });
-
-      if (error) throw error;
-
-      toast.success("Fonds ajoutés avec succès");
-      setNewTransaction({ userId: '', amount: 0 });
-    } catch (error) {
-      console.error('Error adding funds:', error);
-      toast.error("Erreur lors de l'ajout des fonds");
     }
   };
 
@@ -239,54 +211,7 @@ const AdminDashboard = () => {
                 </DialogContent>
               </Dialog>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Prénom</TableHead>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Adresse</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users?.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-mono">{user.id}</TableCell>
-                      <TableCell>{user.first_name}</TableCell>
-                      <TableCell>{user.last_name}</TableCell>
-                      <TableCell>{user.address}</TableCell>
-                      <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">Ajouter des fonds</Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Ajouter des fonds</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <div>
-                                <Label htmlFor="amount">Montant</Label>
-                                <Input
-                                  id="amount"
-                                  type="number"
-                                  value={newTransaction.amount}
-                                  onChange={(e) => setNewTransaction({
-                                    userId: user.id,
-                                    amount: parseFloat(e.target.value)
-                                  })}
-                                />
-                              </div>
-                              <Button onClick={handleAddFunds}>Ajouter</Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <UsersList users={users} refetchUsers={refetchUsers} />
             </>
           )}
 
@@ -332,58 +257,12 @@ const AdminDashboard = () => {
                 </DialogContent>
               </Dialog>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Montant minimum</TableHead>
-                    <TableHead>Taux de rendement</TableHead>
-                    <TableHead>Actif</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {packs?.map((pack) => (
-                    <TableRow key={pack.id}>
-                      <TableCell>{pack.name}</TableCell>
-                      <TableCell>{pack.min_amount}€</TableCell>
-                      <TableCell>{pack.return_rate}%</TableCell>
-                      <TableCell>{pack.is_active ? 'Oui' : 'Non'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <PacksList packs={packs} />
             </>
           )}
 
           {activeTab === 'transactions' && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Utilisateur</TableHead>
-                  <TableHead>Pack</TableHead>
-                  <TableHead>Montant</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Méthode</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions?.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>
-                      {new Date(transaction.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {transaction.profiles?.first_name} {transaction.profiles?.last_name}
-                    </TableCell>
-                    <TableCell>{transaction.investment_packs?.name}</TableCell>
-                    <TableCell>{transaction.amount}€</TableCell>
-                    <TableCell>{transaction.status}</TableCell>
-                    <TableCell>{transaction.payment_method}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <TransactionsList transactions={transactions} />
           )}
         </div>
       </div>
