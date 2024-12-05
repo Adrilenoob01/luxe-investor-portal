@@ -27,6 +27,6 @@ export interface Investment {
   payment_method: string;
   created_at: string;
   updated_at: string;
-  profiles?: Profile | null;
-  investment_packs?: InvestmentPack | null;
+  profiles?: Profile;
+  investment_packs?: InvestmentPack;
 }
