@@ -54,8 +54,24 @@ const AdminDashboard = () => {
         .from('investments')
         .select(`
           *,
-          profiles:user_id(first_name, last_name),
-          investment_packs:pack_id(name)
+          profiles:user_id (
+            id,
+            first_name,
+            last_name,
+            address,
+            is_admin,
+            created_at,
+            updated_at
+          ),
+          investment_packs:pack_id (
+            id,
+            name,
+            min_amount,
+            return_rate,
+            is_active,
+            created_at,
+            updated_at
+          )
         `);
       if (error) throw error;
       return data;
