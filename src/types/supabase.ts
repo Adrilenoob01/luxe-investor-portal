@@ -13,7 +13,7 @@ export interface InvestmentPack {
   name: string;
   min_amount: number;
   return_rate: number;
-  is_active: boolean;
+  is_active: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -27,6 +27,6 @@ export interface Investment {
   payment_method: string;
   created_at: string;
   updated_at: string;
-  profiles?: Profile;
-  investment_packs?: InvestmentPack;
+  profiles?: Profile | null;
+  investment_packs?: InvestmentPack | null;
 }
