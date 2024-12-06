@@ -90,27 +90,33 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          available_balance: number
           created_at: string
           first_name: string | null
           id: string
+          invested_amount: number
           is_admin: boolean | null
           last_name: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
+          available_balance?: number
           created_at?: string
           first_name?: string | null
           id: string
+          invested_amount?: number
           is_admin?: boolean | null
           last_name?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
+          available_balance?: number
           created_at?: string
           first_name?: string | null
           id?: string
+          invested_amount?: number
           is_admin?: boolean | null
           last_name?: string | null
           updated_at?: string
