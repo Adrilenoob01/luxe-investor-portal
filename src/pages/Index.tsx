@@ -65,7 +65,7 @@ const Index = () => {
                 Rendements Attractifs
               </h3>
               <p className="text-gray-600">
-                Des rendements optimisés grâce à notre expertise du marché du luxe.
+                De forts rendements obtenus par un marché en pleine expansion.
               </p>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-md">
