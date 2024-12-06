@@ -25,15 +25,24 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
-  const { data: users, refetch: refetchUsers } = useQuery<Profile[]>({
+  const { data: users, refetch: refetchUsers } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
+      console.log('Fetching users...');
       const { data, error } = await supabase
         .from('profiles')
-        .select('*');
-      if (error) throw error;
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+      }
+      console.log('Fetched users:', data);
       return data;
     },
+    refetchOnWindowFocus: true,
+    staleTime: 1000,
   });
 
   const { data: packs, refetch: refetchPacks } = useQuery<InvestmentPack[]>({
@@ -85,24 +94,32 @@ const AdminDashboard = () => {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
+        options: {
+          data: {
+            first_name: newUser.firstName,
+            last_name: newUser.lastName,
+          },
+        },
       });
 
       if (authError) throw authError;
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          first_name: newUser.firstName,
-          last_name: newUser.lastName,
-          address: newUser.address,
-        })
-        .eq('id', authData.user?.id);
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: newUser.firstName,
+            last_name: newUser.lastName,
+            address: newUser.address,
+          })
+          .eq('id', authData.user.id);
 
-      if (profileError) throw profileError;
+        if (profileError) throw profileError;
 
-      toast.success("Utilisateur créé avec succès");
-      refetchUsers();
-      setNewUser({ firstName: '', lastName: '', email: '', password: '', address: '' });
+        toast.success("Utilisateur créé avec succès");
+        await refetchUsers();
+        setNewUser({ firstName: '', lastName: '', email: '', password: '', address: '' });
+      }
     } catch (error) {
       console.error('Error creating user:', error);
       toast.error("Erreur lors de la création de l'utilisateur");
