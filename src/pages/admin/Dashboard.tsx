@@ -39,7 +39,7 @@ const AdminDashboard = () => {
         throw error;
       }
       console.log('Fetched users:', data);
-      return data;
+      return data as Profile[];
     },
     refetchOnWindowFocus: true,
     staleTime: 1000,
@@ -91,6 +91,8 @@ const AdminDashboard = () => {
 
   const handleCreateUser = async () => {
     try {
+      console.log('Creating user with data:', newUser);
+      
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
@@ -102,9 +104,17 @@ const AdminDashboard = () => {
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
+
+      console.log('Auth data:', authData);
 
       if (authData.user) {
+        // Attendre un peu pour laisser le trigger créer le profil
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
@@ -114,11 +124,19 @@ const AdminDashboard = () => {
           })
           .eq('id', authData.user.id);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile error:', profileError);
+          throw profileError;
+        }
 
+        console.log('Profile updated successfully');
         toast.success("Utilisateur créé avec succès");
-        await refetchUsers();
+        
+        // Réinitialiser le formulaire
         setNewUser({ firstName: '', lastName: '', email: '', password: '', address: '' });
+        
+        // Rafraîchir la liste des utilisateurs
+        await refetchUsers();
       }
     } catch (error) {
       console.error('Error creating user:', error);
