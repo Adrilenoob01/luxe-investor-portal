@@ -28,8 +28,7 @@ const Index = () => {
             Investissez dans le luxe, récoltez les bénéfices
           </p>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Notre plateforme vous permet d'investir dans des collections de vêtements de luxe
-            et de bénéficier de rendements attractifs.
+            Investissez dans des commandes de vêtements de luxe afin d'en récolter les dividendes.
           </p>
         </div>
 
