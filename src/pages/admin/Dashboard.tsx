@@ -54,16 +54,18 @@ const AdminDashboard = () => {
         .from('investments')
         .select(`
           *,
-          profiles:user_id (
+          profiles (
             id,
             first_name,
             last_name,
             address,
             is_admin,
+            available_balance,
+            invested_amount,
             created_at,
             updated_at
           ),
-          investment_packs:pack_id (
+          investment_packs (
             id,
             name,
             min_amount,
