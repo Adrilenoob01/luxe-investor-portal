@@ -28,21 +28,14 @@ const AdminDashboard = () => {
   const { data: users, refetch: refetchUsers } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      console.log('Fetching users...');
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('Error fetching users:', error);
-        throw error;
-      }
-      console.log('Fetched users:', data);
+      if (error) throw error;
       return data as Profile[];
-    },
-    refetchOnWindowFocus: true,
-    staleTime: 1000,
+    }
   });
 
   const { data: packs, refetch: refetchPacks } = useQuery<InvestmentPack[]>({
@@ -71,6 +64,7 @@ const AdminDashboard = () => {
             is_admin,
             available_balance,
             invested_amount,
+            email,
             created_at,
             updated_at
           ),
@@ -176,7 +170,10 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <h1 className="text-3xl font-bold text-gray-900">Administration</h1>
-            <Button variant="outline" onClick={handleLogout}>
+            <Button variant="outline" onClick={() => {
+              localStorage.removeItem("isAdminAuthenticated");
+              navigate("/admin/login");
+            }}>
               Déconnexion
             </Button>
           </div>
@@ -264,7 +261,11 @@ const AdminDashboard = () => {
                 </DialogContent>
               </Dialog>
 
-              <UsersList users={users} refetchUsers={refetchUsers} />
+              <UsersList 
+                users={users} 
+                packs={packs || []} 
+                refetchUsers={refetchUsers} 
+              />
             </>
           )}
 
