@@ -22,36 +22,38 @@ interface UsersListProps {
 }
 
 export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
-  const [newTransaction, setNewTransaction] = useState({ userId: '', amount: 0 });
+  const [editingUser, setEditingUser] = useState<Profile | null>(null);
+  const [userEmail, setUserEmail] = useState("");
 
-  const handleAddFunds = async () => {
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+
     try {
       const { error } = await supabase
-        .from('investments')
-        .insert({
-          user_id: newTransaction.userId,
-          amount: newTransaction.amount,
-          status: 'completed',
-          payment_method: 'admin',
-        });
+        .from('profiles')
+        .update({
+          first_name: editingUser.first_name,
+          last_name: editingUser.last_name,
+          address: editingUser.address,
+          available_balance: editingUser.available_balance,
+          invested_amount: editingUser.invested_amount
+        })
+        .eq('id', editingUser.id);
 
       if (error) throw error;
 
-      toast.success("Fonds ajoutés avec succès");
-      setNewTransaction({ userId: '', amount: 0 });
+      toast.success("Informations utilisateur mises à jour");
+      setEditingUser(null);
       refetchUsers();
     } catch (error) {
-      console.error('Error adding funds:', error);
-      toast.error("Erreur lors de l'ajout des fonds");
+      console.error('Error updating user:', error);
+      toast.error("Erreur lors de la mise à jour des informations");
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
+      const { error } = await supabase.auth.admin.deleteUser(userId);
 
       if (error) throw error;
 
@@ -67,43 +69,77 @@ export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>ID</TableHead>
+          <TableHead>E-mail</TableHead>
           <TableHead>Prénom</TableHead>
           <TableHead>Nom</TableHead>
           <TableHead>Adresse</TableHead>
+          <TableHead>Solde disponible</TableHead>
+          <TableHead>Montant investi</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {users?.map((user) => (
           <TableRow key={user.id}>
-            <TableCell className="font-mono">{user.id}</TableCell>
+            <TableCell>{userEmail}</TableCell>
             <TableCell>{user.first_name}</TableCell>
             <TableCell>{user.last_name}</TableCell>
             <TableCell>{user.address}</TableCell>
+            <TableCell>{user.available_balance}€</TableCell>
+            <TableCell>{user.invested_amount}€</TableCell>
             <TableCell className="space-x-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">Ajouter des fonds</Button>
+                  <Button variant="outline" size="sm">Modifier</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Ajouter des fonds</DialogTitle>
+                    <DialogTitle>Modifier l'utilisateur</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="amount">Montant</Label>
+                      <Label htmlFor="firstName">Prénom</Label>
                       <Input
-                        id="amount"
-                        type="number"
-                        value={newTransaction.amount}
-                        onChange={(e) => setNewTransaction({
-                          userId: user.id,
-                          amount: parseFloat(e.target.value)
-                        })}
+                        id="firstName"
+                        value={editingUser?.first_name || ""}
+                        onChange={(e) => setEditingUser(prev => prev ? {...prev, first_name: e.target.value} : null)}
                       />
                     </div>
-                    <Button onClick={handleAddFunds}>Ajouter</Button>
+                    <div>
+                      <Label htmlFor="lastName">Nom</Label>
+                      <Input
+                        id="lastName"
+                        value={editingUser?.last_name || ""}
+                        onChange={(e) => setEditingUser(prev => prev ? {...prev, last_name: e.target.value} : null)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="address">Adresse</Label>
+                      <Input
+                        id="address"
+                        value={editingUser?.address || ""}
+                        onChange={(e) => setEditingUser(prev => prev ? {...prev, address: e.target.value} : null)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="balance">Solde disponible</Label>
+                      <Input
+                        id="balance"
+                        type="number"
+                        value={editingUser?.available_balance || 0}
+                        onChange={(e) => setEditingUser(prev => prev ? {...prev, available_balance: parseFloat(e.target.value)} : null)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="invested">Montant investi</Label>
+                      <Input
+                        id="invested"
+                        type="number"
+                        value={editingUser?.invested_amount || 0}
+                        onChange={(e) => setEditingUser(prev => prev ? {...prev, invested_amount: parseFloat(e.target.value)} : null)}
+                      />
+                    </div>
+                    <Button onClick={handleUpdateUser}>Mettre à jour</Button>
                   </div>
                 </DialogContent>
               </Dialog>

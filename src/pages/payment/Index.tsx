@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -12,134 +13,152 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { InvestmentPack } from "@/types/supabase";
 
-const PaymentPage = () => {
-  const location = useLocation();
+export default function Payment() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [amount, setAmount] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const packData = location.state;
+  const [packs, setPacks] = useState<InvestmentPack[]>([]);
+  const [selectedPack, setSelectedPack] = useState<InvestmentPack | null>(null);
+  const [amount, setAmount] = useState<number>(0);
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
 
   useEffect(() => {
-    if (!packData) {
-      navigate("/");
-      return;
-    }
-
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/login");
-      }
-    };
+    fetchPacks();
     checkAuth();
-  }, [packData, navigate]);
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate('/login');
+    }
+  };
 
+  const fetchPacks = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) {
-        throw new Error("Non authentifié");
+      const { data, error } = await supabase
+        .from('investment_packs')
+        .select('*')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setPacks(data);
+    } catch (error) {
+      console.error('Error fetching packs:', error);
+      toast.error("Erreur lors du chargement des packs d'investissement");
+    }
+  };
+
+  const handlePackSelect = (packId: string) => {
+    const pack = packs.find(p => p.id === packId);
+    setSelectedPack(pack || null);
+    if (pack) {
+      setAmount(pack.min_amount);
+    }
+  };
+
+  const handleInvest = async () => {
+    try {
+      if (!selectedPack) {
+        toast.error("Veuillez sélectionner un pack d'investissement");
+        return;
       }
 
-      const numAmount = parseFloat(amount);
-      if (numAmount < packData.minAmount) {
-        throw new Error(`Le montant minimum est de ${packData.minAmount}€`);
+      if (amount < selectedPack.min_amount) {
+        toast.error(`Le montant minimum pour ce pack est de ${selectedPack.min_amount}€`);
+        return;
+      }
+
+      if (!paymentMethod) {
+        toast.error("Veuillez sélectionner une méthode de paiement");
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate('/login');
+        return;
       }
 
       const { error } = await supabase
-        .from("investments")
+        .from('investments')
         .insert({
           user_id: session.user.id,
-          amount: numAmount,
+          pack_id: selectedPack.id,
+          amount: amount,
           payment_method: paymentMethod,
+          status: 'pending'
         });
 
       if (error) throw error;
 
-      toast({
-        title: "Investissement réussi",
-        description: "Votre investissement a été enregistré avec succès.",
-      });
-      navigate("/dashboard");
+      toast.success("Investissement enregistré avec succès");
+      navigate('/dashboard');
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message,
-      });
-    } finally {
-      setLoading(false);
+      console.error('Error creating investment:', error);
+      toast.error("Erreur lors de la création de l'investissement");
     }
   };
 
-  if (!packData) return null;
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="container mx-auto px-4 py-16">
-        <Card className="max-w-md mx-auto p-6">
-          <h1 className="text-2xl font-bold mb-6">Finaliser votre investissement</h1>
-          
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">{packData.packTitle}</h2>
-            <p className="text-gray-600">
-              Rendement: +{packData.returnRate}%
-            </p>
-            <p className="text-gray-600">
-              Montant minimum: {packData.minAmount}€
-            </p>
+    <div className="min-h-screen bg-gray-50 py-12">
+      <Card className="max-w-md mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-6">Investir</h1>
+        
+        <div className="space-y-6">
+          <div>
+            <Label htmlFor="pack">Pack d'investissement</Label>
+            <Select onValueChange={handlePackSelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez un pack" />
+              </SelectTrigger>
+              <SelectContent>
+                {packs.map((pack) => (
+                  <SelectItem key={pack.id} value={pack.id}>
+                    {pack.name} - Min: {pack.min_amount}€ ({pack.return_rate}% de rendement)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-                Montant à investir (€)
-              </label>
-              <Input
-                id="amount"
-                type="number"
-                min={packData.minAmount}
-                step="0.01"
-                required
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder={`Minimum ${packData.minAmount}€`}
-              />
-            </div>
+          {selectedPack && (
+            <>
+              <div>
+                <Label htmlFor="amount">Montant à investir (€)</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  min={selectedPack.min_amount}
+                  value={amount}
+                  onChange={(e) => setAmount(parseFloat(e.target.value))}
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Montant minimum : {selectedPack.min_amount}€
+                </p>
+              </div>
 
-            <div>
-              <label htmlFor="payment-method" className="block text-sm font-medium text-gray-700 mb-1">
-                Moyen de paiement
-              </label>
-              <Select required onValueChange={setPaymentMethod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir un moyen de paiement" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="card">Carte bancaire</SelectItem>
-                  <SelectItem value="transfer">Virement bancaire</SelectItem>
-                  <SelectItem value="crypto">Crypto-monnaie</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div>
+                <Label htmlFor="paymentMethod">Méthode de paiement</Label>
+                <Select onValueChange={setPaymentMethod}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez une méthode de paiement" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="card">Carte bancaire</SelectItem>
+                    <SelectItem value="transfer">Virement bancaire</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Traitement en cours..." : "Confirmer l'investissement"}
-            </Button>
-          </form>
-        </Card>
-      </div>
+              <Button onClick={handleInvest} className="w-full">
+                Investir maintenant
+              </Button>
+            </>
+          )}
+        </div>
+      </Card>
     </div>
   );
-};
-
-export default PaymentPage;
+}
