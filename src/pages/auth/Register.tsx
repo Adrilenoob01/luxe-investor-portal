@@ -61,28 +61,6 @@ export default function Register() {
           theme="light"
           providers={[]}
           redirectTo={`${window.location.origin}/dashboard`}
-          onSubmit={async (formData) => {
-            try {
-              const { error } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                  data: {
-                    first_name: formData.first_name || '',
-                    last_name: formData.last_name || '',
-                  },
-                },
-              });
-              if (error) throw error;
-            } catch (error) {
-              console.error('Error during registration:', error);
-              toast({
-                title: "Erreur lors de l'inscription",
-                description: "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
-                variant: "destructive",
-              });
-            }
-          }}
         />
 
         <div className="text-center text-sm text-muted-foreground">
