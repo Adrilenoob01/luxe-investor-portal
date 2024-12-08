@@ -12,6 +12,7 @@ export type Database = {
       investment_packs: {
         Row: {
           created_at: string
+          description: string
           id: string
           is_active: boolean | null
           min_amount: number
@@ -21,6 +22,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string
           id?: string
           is_active?: boolean | null
           min_amount: number
@@ -30,6 +32,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string
           id?: string
           is_active?: boolean | null
           min_amount?: number
