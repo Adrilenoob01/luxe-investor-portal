@@ -95,6 +95,7 @@ export type Database = {
           address: string | null
           available_balance: number
           created_at: string
+          email: string | null
           first_name: string | null
           id: string
           invested_amount: number
@@ -106,6 +107,7 @@ export type Database = {
           address?: string | null
           available_balance?: number
           created_at?: string
+          email?: string | null
           first_name?: string | null
           id: string
           invested_amount?: number
@@ -117,6 +119,7 @@ export type Database = {
           address?: string | null
           available_balance?: number
           created_at?: string
+          email?: string | null
           first_name?: string | null
           id?: string
           invested_amount?: number
@@ -166,7 +169,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_email: {
+        Args: {
+          user_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
