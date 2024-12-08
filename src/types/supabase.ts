@@ -4,6 +4,8 @@ export interface Profile {
   last_name: string | null;
   address: string | null;
   is_admin: boolean | null;
+  available_balance: number;
+  invested_amount: number;
   created_at: string;
   updated_at: string;
 }
