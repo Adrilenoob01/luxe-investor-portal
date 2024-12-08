@@ -50,7 +50,7 @@ const Index = () => {
                 title={pack.name}
                 minAmount={pack.min_amount}
                 returnRate={pack.return_rate}
-                description="Investissez dans le luxe et bénéficiez de rendements attractifs."
+                description={pack.description}
               />
             ))
           )}
@@ -74,7 +74,7 @@ const Index = () => {
                 Sécurité
               </h3>
               <p className="text-gray-600">
-                Vos investissements sont sécurisés et gérés par des professionnels.
+                Vos investissements sont sécurisés et visibles en temps réel.
               </p>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-md">

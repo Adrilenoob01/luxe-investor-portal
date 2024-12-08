@@ -9,6 +9,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import UserDashboard from "./pages/dashboard/Index";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Payment from "./pages/payment/Index";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/payment" element={<Payment />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

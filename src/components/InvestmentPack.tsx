@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 interface InvestmentPackProps {
   title: string;
@@ -9,6 +12,29 @@ interface InvestmentPackProps {
 }
 
 export const InvestmentPack = ({ title, minAmount, returnRate, description }: InvestmentPackProps) => {
+  const navigate = useNavigate();
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+  }, []);
+
+  const handleInvest = () => {
+    if (!session) {
+      navigate("/login");
+    } else {
+      navigate("/payment", { 
+        state: { 
+          packTitle: title,
+          minAmount,
+          returnRate
+        } 
+      });
+    }
+  };
+
   return (
     <Card className="card-hover shadow-card">
       <CardHeader>
@@ -28,7 +54,7 @@ export const InvestmentPack = ({ title, minAmount, returnRate, description }: In
         <p className="text-gray-600">{description}</p>
       </CardContent>
       <CardFooter>
-        <Button className="w-full">Investir maintenant</Button>
+        <Button onClick={handleInvest} className="w-full">Investir maintenant</Button>
       </CardFooter>
     </Card>
   );
