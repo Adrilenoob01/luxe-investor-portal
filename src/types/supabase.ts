@@ -8,6 +8,7 @@ export interface Profile {
   invested_amount: number;
   created_at: string;
   updated_at: string;
+  email: string | null;
 }
 
 export interface InvestmentPack {

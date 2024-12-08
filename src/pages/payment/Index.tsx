@@ -147,7 +147,8 @@ export default function Payment() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="card">Carte bancaire</SelectItem>
-                    <SelectItem value="transfer">Virement bancaire</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                    <SelectItem value="cash">Espèces</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

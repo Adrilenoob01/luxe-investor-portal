@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Profile } from "@/types/supabase";
+import { Profile, InvestmentPack } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -7,13 +7,15 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { CreateTransactionDialog } from "./CreateTransactionDialog";
 
 interface UserActionsProps {
   user: Profile;
+  packs: InvestmentPack[];
   refetchUsers: () => void;
 }
 
-export const UserActions = ({ user, refetchUsers }: UserActionsProps) => {
+export const UserActions = ({ user, packs, refetchUsers }: UserActionsProps) => {
   const [editingUser, setEditingUser] = useState<Profile | null>(null);
 
   const handleUpdateUser = async () => {
@@ -122,6 +124,12 @@ export const UserActions = ({ user, refetchUsers }: UserActionsProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CreateTransactionDialog 
+        user={user}
+        packs={packs}
+        onTransactionCreated={refetchUsers}
+      />
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
