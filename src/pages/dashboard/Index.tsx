@@ -16,6 +16,8 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ProfileForm } from "@/components/ProfileForm";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -31,6 +33,24 @@ const Dashboard = () => {
     };
     checkAuth();
   }, [navigate]);
+
+  // Fetch user's profile and investments
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   // Fetch user's investments
   const { data: investments, isLoading: investmentsLoading } = useQuery({
@@ -88,19 +108,19 @@ const Dashboard = () => {
       if (error) throw error;
 
       toast({
-        title: "Withdrawal Request Submitted",
-        description: "Your withdrawal request has been submitted for processing.",
+        title: "Demande de retrait soumise",
+        description: "Votre demande de retrait a été soumise pour traitement.",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to submit withdrawal request. Please try again.",
+        title: "Erreur",
+        description: "Échec de la soumission de la demande de retrait. Veuillez réessayer.",
         variant: "destructive",
       });
     }
   };
 
-  if (investmentsLoading) {
+  if (profileLoading || investmentsLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -112,34 +132,47 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">Modifier mes informations</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Mes informations personnelles</DialogTitle>
+              </DialogHeader>
+              <ProfileForm />
+            </DialogContent>
+          </Dialog>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Total Invested</h3>
+            <h3 className="text-lg font-semibold mb-2">Solde disponible</h3>
             <p className="text-2xl font-bold text-primary">
-              ${totalInvested.toLocaleString()}
+              {profile?.available_balance?.toLocaleString()}€
             </p>
           </Card>
           
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Estimated Returns</h3>
+            <h3 className="text-lg font-semibold mb-2">Montant investi</h3>
             <p className="text-2xl font-bold text-success-DEFAULT">
-              ${estimatedReturns.toLocaleString()}
+              {profile?.invested_amount?.toLocaleString()}€
             </p>
           </Card>
           
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Total Portfolio Value</h3>
+            <h3 className="text-lg font-semibold mb-2">Rendements estimés</h3>
             <p className="text-2xl font-bold text-secondary">
-              ${(totalInvested + estimatedReturns).toLocaleString()}
+              {estimatedReturns.toLocaleString()}€
             </p>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Portfolio Evolution</h3>
+            <h3 className="text-lg font-semibold mb-4">Évolution du portefeuille</h3>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={portfolioData}>
@@ -159,7 +192,7 @@ const Dashboard = () => {
           </Card>
 
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Active Investments</h3>
+            <h3 className="text-lg font-semibold mb-4">Investissements actifs</h3>
             <div className="space-y-4">
               {investments?.map((investment) => (
                 <div
@@ -169,10 +202,10 @@ const Dashboard = () => {
                   <div>
                     <p className="font-semibold">{investment.investment_packs?.name}</p>
                     <p className="text-sm text-gray-600">
-                      Return Rate: {investment.investment_packs?.return_rate}%
+                      Taux de rendement : {investment.investment_packs?.return_rate}%
                     </p>
                   </div>
-                  <p className="font-semibold">${Number(investment.amount).toLocaleString()}</p>
+                  <p className="font-semibold">{Number(investment.amount).toLocaleString()}€</p>
                 </div>
               ))}
             </div>
@@ -184,7 +217,7 @@ const Dashboard = () => {
             onClick={handleWithdrawalRequest}
             disabled={estimatedReturns <= 0}
           >
-            Request Withdrawal
+            Demander un retrait
           </Button>
         </div>
       </main>

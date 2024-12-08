@@ -23,7 +23,6 @@ interface UsersListProps {
 
 export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
   const [editingUser, setEditingUser] = useState<Profile | null>(null);
-  const [userEmail, setUserEmail] = useState("");
 
   const handleUpdateUser = async () => {
     if (!editingUser) return;
@@ -65,6 +64,17 @@ export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
     }
   };
 
+  const getUserEmail = async (userId: string) => {
+    try {
+      const { data: { user }, error } = await supabase.auth.admin.getUserById(userId);
+      if (error) throw error;
+      return user?.email || "Email non disponible";
+    } catch (error) {
+      console.error('Error fetching user email:', error);
+      return "Email non disponible";
+    }
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -81,7 +91,7 @@ export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
       <TableBody>
         {users?.map((user) => (
           <TableRow key={user.id}>
-            <TableCell>{userEmail}</TableCell>
+            <TableCell>{getUserEmail(user.id)}</TableCell>
             <TableCell>{user.first_name}</TableCell>
             <TableCell>{user.last_name}</TableCell>
             <TableCell>{user.address}</TableCell>
