@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Profile } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +21,30 @@ interface UsersListProps {
   refetchUsers: () => void;
 }
 
+interface UserWithEmail extends Profile {
+  email: string;
+}
+
 export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
   const [editingUser, setEditingUser] = useState<Profile | null>(null);
+  const [usersWithEmail, setUsersWithEmail] = useState<UserWithEmail[]>([]);
+
+  useEffect(() => {
+    const fetchEmails = async () => {
+      if (!users) return;
+      
+      const usersData = await Promise.all(
+        users.map(async (user) => {
+          const email = await getUserEmail(user.id);
+          return { ...user, email };
+        })
+      );
+      
+      setUsersWithEmail(usersData);
+    };
+
+    fetchEmails();
+  }, [users]);
 
   const handleUpdateUser = async () => {
     if (!editingUser) return;
@@ -89,9 +111,9 @@ export const UsersList = ({ users, refetchUsers }: UsersListProps) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {users?.map((user) => (
+        {usersWithEmail.map((user) => (
           <TableRow key={user.id}>
-            <TableCell>{getUserEmail(user.id)}</TableCell>
+            <TableCell>{user.email}</TableCell>
             <TableCell>{user.first_name}</TableCell>
             <TableCell>{user.last_name}</TableCell>
             <TableCell>{user.address}</TableCell>
