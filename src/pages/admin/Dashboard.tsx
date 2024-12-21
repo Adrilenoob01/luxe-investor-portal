@@ -75,7 +75,17 @@ const AdminDashboard = () => {
             return_rate,
             is_active,
             created_at,
-            updated_at
+            updated_at,
+            description,
+            collected_amount,
+            implementation_date,
+            end_date,
+            status,
+            image_url,
+            short_description,
+            detailed_description,
+            location,
+            category
           )
         `);
       if (error) throw error;
@@ -170,10 +180,7 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <h1 className="text-3xl font-bold text-gray-900">Administration</h1>
-            <Button variant="outline" onClick={() => {
-              localStorage.removeItem("isAdminAuthenticated");
-              navigate("/admin/login");
-            }}>
+            <Button variant="outline" onClick={handleLogout}>
               Déconnexion
             </Button>
           </div>
@@ -192,7 +199,7 @@ const AdminDashboard = () => {
             variant={activeTab === 'packs' ? 'default' : 'outline'}
             onClick={() => setActiveTab('packs')}
           >
-            Packs
+            Commandes
           </Button>
           <Button
             variant={activeTab === 'transactions' ? 'default' : 'outline'}
@@ -273,11 +280,11 @@ const AdminDashboard = () => {
             <>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="mb-4">Créer un pack</Button>
+                  <Button className="mb-4">Créer une commande</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Créer un nouveau pack d'investissement</DialogTitle>
+                    <DialogTitle>Créer une nouvelle commande</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>

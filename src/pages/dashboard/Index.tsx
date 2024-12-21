@@ -18,12 +18,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ProfileForm } from "@/components/ProfileForm";
+import { Investment, Profile } from "@/types/supabase";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -34,7 +34,6 @@ const Dashboard = () => {
     checkAuth();
   }, [navigate]);
 
-  // Fetch user's profile and investments
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
@@ -48,12 +47,11 @@ const Dashboard = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Profile;
     },
   });
 
-  // Fetch user's investments
-  const { data: investments, isLoading: investmentsLoading } = useQuery({
+  const { data: investments, isLoading: investmentsLoading } = useQuery<Investment[]>({
     queryKey: ["investments"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -63,9 +61,24 @@ const Dashboard = () => {
         .from("investments")
         .select(`
           *,
-          investment_packs (
+          order_projects (
+            id,
             name,
-            return_rate
+            target_amount,
+            return_rate,
+            is_active,
+            created_at,
+            updated_at,
+            description,
+            collected_amount,
+            implementation_date,
+            end_date,
+            status,
+            image_url,
+            short_description,
+            detailed_description,
+            location,
+            category
           )
         `)
         .eq("user_id", session.user.id);
@@ -78,7 +91,7 @@ const Dashboard = () => {
   // Calculate portfolio metrics
   const totalInvested = investments?.reduce((sum, inv) => sum + Number(inv.amount), 0) || 0;
   const estimatedReturns = investments?.reduce((sum, inv) => {
-    const returnRate = inv.investment_packs?.return_rate || 0;
+    const returnRate = inv.order_projects?.return_rate || 0;
     return sum + (Number(inv.amount) * (returnRate / 100));
   }, 0) || 0;
 
@@ -200,9 +213,9 @@ const Dashboard = () => {
                   className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
                 >
                   <div>
-                    <p className="font-semibold">{investment.investment_packs?.name}</p>
+                    <p className="font-semibold">{investment.order_projects?.name}</p>
                     <p className="text-sm text-gray-600">
-                      Taux de rendement : {investment.investment_packs?.return_rate}%
+                      Taux de rendement : {investment.order_projects?.return_rate}%
                     </p>
                   </div>
                   <p className="font-semibold">{Number(investment.amount).toLocaleString()}€</p>

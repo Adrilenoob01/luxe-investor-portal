@@ -1,10 +1,10 @@
-import { Profile, InvestmentPack } from "@/types/supabase";
+import { Profile, OrderProject } from "@/types/supabase";
 import { UserActions } from "./UserActions";
 import { UsersTable } from "./UsersTable";
 
 interface UsersListProps {
   users: Profile[] | null;
-  packs: InvestmentPack[];
+  packs: OrderProject[];
   refetchUsers: () => void;
 }
 
