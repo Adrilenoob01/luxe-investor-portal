@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Profile, InvestmentPack } from "@/types/supabase";
+import { Profile, OrderProject } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import { CreateTransactionDialog } from "./CreateTransactionDialog";
 
 interface UserActionsProps {
   user: Profile;
-  packs: InvestmentPack[];
+  packs: OrderProject[];
   refetchUsers: () => void;
 }
 

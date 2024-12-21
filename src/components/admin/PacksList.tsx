@@ -1,4 +1,4 @@
-import { InvestmentPack } from "@/types/supabase";
+import { OrderProject } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface PacksListProps {
-  packs: InvestmentPack[] | null;
+  packs: OrderProject[] | null;
   refetchPacks: () => void;
 }
 
@@ -21,7 +21,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
   const handleDeletePack = async (packId: string) => {
     try {
       const { error } = await supabase
-        .from('investment_packs')
+        .from('order_projects')
         .delete()
         .eq('id', packId);
 
@@ -40,7 +40,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
       <TableHeader>
         <TableRow>
           <TableHead>Nom</TableHead>
-          <TableHead>Montant minimum</TableHead>
+          <TableHead>Montant cible</TableHead>
           <TableHead>Taux de rendement</TableHead>
           <TableHead>Actif</TableHead>
           <TableHead>Actions</TableHead>
@@ -50,7 +50,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
         {packs?.map((pack) => (
           <TableRow key={pack.id}>
             <TableCell>{pack.name}</TableCell>
-            <TableCell>{pack.min_amount}€</TableCell>
+            <TableCell>{pack.target_amount}€</TableCell>
             <TableCell>{pack.return_rate}%</TableCell>
             <TableCell>{pack.is_active ? 'Oui' : 'Non'}</TableCell>
             <TableCell>
@@ -62,7 +62,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Cette action est irréversible. Cela supprimera définitivement le pack d'investissement.
+                      Cette action est irréversible. Cela supprimera définitivement le projet d'investissement.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

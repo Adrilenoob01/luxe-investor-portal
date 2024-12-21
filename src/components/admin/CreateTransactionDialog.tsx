@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Profile, InvestmentPack } from "@/types/supabase";
+import { Profile, OrderProject } from "@/types/supabase";
 
 interface CreateTransactionDialogProps {
   user: Profile;
-  packs: InvestmentPack[];
+  packs: OrderProject[];
   onTransactionCreated: () => void;
 }
 

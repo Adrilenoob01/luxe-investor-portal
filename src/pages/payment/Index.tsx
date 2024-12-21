@@ -13,12 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { InvestmentPack } from "@/types/supabase";
+import { OrderProject } from "@/types/supabase";
 
 export default function Payment() {
   const navigate = useNavigate();
-  const [packs, setPacks] = useState<InvestmentPack[]>([]);
-  const [selectedPack, setSelectedPack] = useState<InvestmentPack | null>(null);
+  const [packs, setPacks] = useState<OrderProject[]>([]);
+  const [selectedPack, setSelectedPack] = useState<OrderProject | null>(null);
   const [amount, setAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>("");
 
@@ -37,7 +37,7 @@ export default function Payment() {
   const fetchPacks = async () => {
     try {
       const { data, error } = await supabase
-        .from('investment_packs')
+        .from('order_projects')
         .select('*')
         .eq('is_active', true);
 
@@ -45,7 +45,7 @@ export default function Payment() {
       setPacks(data);
     } catch (error) {
       console.error('Error fetching packs:', error);
-      toast.error("Erreur lors du chargement des packs d'investissement");
+      toast.error("Erreur lors du chargement des projets d'investissement");
     }
   };
 
@@ -53,7 +53,7 @@ export default function Payment() {
     const pack = packs.find(p => p.id === packId);
     setSelectedPack(pack || null);
     if (pack) {
-      setAmount(pack.min_amount);
+      setAmount(pack.target_amount);
     }
   };
 
@@ -64,8 +64,8 @@ export default function Payment() {
         return;
       }
 
-      if (amount < selectedPack.min_amount) {
-        toast.error(`Le montant minimum pour ce pack est de ${selectedPack.min_amount}€`);
+      if (amount < selectedPack.target_amount) {
+        toast.error(`Le montant minimum pour ce pack est de ${selectedPack.target_amount}€`);
         return;
       }
 
@@ -85,7 +85,7 @@ export default function Payment() {
         .from('investments')
         .insert({
           user_id: session.user.id,
-          pack_id: selectedPack.id,
+          project_id: selectedPack.id,
           amount: amount,
           payment_method: paymentMethod,
           status: 'pending'
@@ -116,7 +116,7 @@ export default function Payment() {
               <SelectContent>
                 {packs.map((pack) => (
                   <SelectItem key={pack.id} value={pack.id}>
-                    {pack.name} - Min: {pack.min_amount}€ ({pack.return_rate}% de rendement)
+                    {pack.name} - Min: {pack.target_amount}€ ({pack.return_rate}% de rendement)
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -130,12 +130,12 @@ export default function Payment() {
                 <Input
                   id="amount"
                   type="number"
-                  min={selectedPack.min_amount}
+                  min={selectedPack.target_amount}
                   value={amount}
                   onChange={(e) => setAmount(parseFloat(e.target.value))}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  Montant minimum : {selectedPack.min_amount}€
+                  Montant minimum : {selectedPack.target_amount}€
                 </p>
               </div>
 

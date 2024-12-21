@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { UsersList } from "@/components/admin/UsersList";
 import { PacksList } from "@/components/admin/PacksList";
 import { TransactionsList } from "@/components/admin/TransactionsList";
-import { Profile, InvestmentPack, Investment } from "@/types/supabase";
+import { Profile, OrderProject, Investment } from "@/types/supabase";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -38,11 +38,11 @@ const AdminDashboard = () => {
     }
   });
 
-  const { data: packs, refetch: refetchPacks } = useQuery<InvestmentPack[]>({
+  const { data: packs, refetch: refetchPacks } = useQuery<OrderProject[]>({
     queryKey: ['admin-packs'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('investment_packs')
+        .from('order_projects')
         .select('*');
       if (error) throw error;
       return data;
@@ -68,10 +68,10 @@ const AdminDashboard = () => {
             created_at,
             updated_at
           ),
-          investment_packs (
+          order_projects (
             id,
             name,
-            min_amount,
+            target_amount,
             return_rate,
             is_active,
             created_at,
@@ -141,10 +141,10 @@ const AdminDashboard = () => {
   const handleCreatePack = async () => {
     try {
       const { error } = await supabase
-        .from('investment_packs')
+        .from('order_projects')
         .insert({
           name: newPack.name,
-          min_amount: newPack.minAmount,
+          target_amount: newPack.minAmount,
           return_rate: newPack.returnRate,
         });
 
