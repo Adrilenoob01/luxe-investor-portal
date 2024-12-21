@@ -19,7 +19,7 @@ export const TransactionsList = ({ transactions }: TransactionsListProps) => {
         <TableRow>
           <TableHead>Date</TableHead>
           <TableHead>Utilisateur</TableHead>
-          <TableHead>Pack</TableHead>
+          <TableHead>Commande</TableHead>
           <TableHead>Montant</TableHead>
           <TableHead>Statut</TableHead>
           <TableHead>Méthode</TableHead>
@@ -34,7 +34,7 @@ export const TransactionsList = ({ transactions }: TransactionsListProps) => {
             <TableCell>
               {transaction.profiles?.first_name} {transaction.profiles?.last_name}
             </TableCell>
-            <TableCell>{transaction.investment_packs?.name}</TableCell>
+            <TableCell>{transaction.order_projects?.name}</TableCell>
             <TableCell>{transaction.amount}€</TableCell>
             <TableCell>{transaction.status}</TableCell>
             <TableCell>{transaction.payment_method}</TableCell>

@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 
 interface InvestmentPackProps {
@@ -15,6 +16,7 @@ interface InvestmentPackProps {
   category?: string | null;
   implementationDate?: string | null;
   endDate?: string | null;
+  status?: string;
 }
 
 export const InvestmentPack = ({
@@ -29,8 +31,35 @@ export const InvestmentPack = ({
   category,
   implementationDate,
   endDate,
+  status,
 }: InvestmentPackProps) => {
   const navigate = useNavigate();
+
+  const getStatusColor = (status: string | undefined) => {
+    switch (status) {
+      case 'collecting':
+        return 'bg-green-100 text-green-800';
+      case 'completed':
+        return 'bg-gray-100 text-gray-800';
+      case 'upcoming':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status: string | undefined) => {
+    switch (status) {
+      case 'collecting':
+        return 'En cours';
+      case 'completed':
+        return 'Terminée';
+      case 'upcoming':
+        return 'Prochainement';
+      default:
+        return status;
+    }
+  };
 
   return (
     <Card className="overflow-hidden">
@@ -44,11 +73,18 @@ export const InvestmentPack = ({
         </div>
       )}
       <div className="p-6">
-        {category && (
-          <span className="inline-block px-3 py-1 text-sm font-semibold text-primary-600 bg-primary-50 rounded-full mb-2">
-            {category}
-          </span>
-        )}
+        <div className="flex justify-between items-start mb-4">
+          {category && (
+            <span className="inline-block px-3 py-1 text-sm font-semibold text-primary-600 bg-primary-50 rounded-full">
+              {category}
+            </span>
+          )}
+          {status && (
+            <Badge className={getStatusColor(status)}>
+              {getStatusText(status)}
+            </Badge>
+          )}
+        </div>
         <h3 className="text-xl font-bold mb-2">{title}</h3>
         {shortDescription && (
           <p className="text-gray-600 text-sm mb-3">{shortDescription}</p>
@@ -79,15 +115,24 @@ export const InvestmentPack = ({
           )}
           {implementationDate && (
             <div className="text-sm">
-              <p className="text-gray-600">Date de mise en œuvre</p>
+              <p className="text-gray-600">Date de début</p>
               <p className="font-semibold">
                 {new Date(implementationDate).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+          {endDate && (
+            <div className="text-sm">
+              <p className="text-gray-600">Date de fin</p>
+              <p className="font-semibold">
+                {new Date(endDate).toLocaleDateString()}
               </p>
             </div>
           )}
           <Button 
             className="w-full" 
             onClick={() => navigate("/payment")}
+            disabled={status === 'completed' || status === 'upcoming'}
           >
             Investir
           </Button>

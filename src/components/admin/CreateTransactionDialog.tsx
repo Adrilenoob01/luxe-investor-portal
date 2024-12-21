@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -30,13 +31,13 @@ export const CreateTransactionDialog = ({ user, packs, onTransactionCreated }: C
     try {
       if (transactionType === 'investment') {
         if (!selectedPack) {
-          toast.error("Veuillez sélectionner un pack d'investissement");
+          toast.error("Veuillez sélectionner une commande");
           return;
         }
 
         const selectedPackData = packs.find(p => p.id === selectedPack);
-        if (!selectedPackData || amount < selectedPackData.min_amount) {
-          toast.error(`Le montant minimum pour ce pack est de ${selectedPackData?.min_amount}€`);
+        if (!selectedPackData || amount < selectedPackData.target_amount) {
+          toast.error(`Le montant minimum pour cette commande est de ${selectedPackData?.target_amount}€`);
           return;
         }
 
@@ -49,7 +50,7 @@ export const CreateTransactionDialog = ({ user, packs, onTransactionCreated }: C
           .from('investments')
           .insert({
             user_id: user.id,
-            pack_id: selectedPack,
+            project_id: selectedPack,
             amount: amount,
             payment_method: paymentMethod,
             status: 'completed'
@@ -57,7 +58,6 @@ export const CreateTransactionDialog = ({ user, packs, onTransactionCreated }: C
 
         if (investmentError) throw investmentError;
 
-        // Update user's balances
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
@@ -79,7 +79,6 @@ export const CreateTransactionDialog = ({ user, packs, onTransactionCreated }: C
 
         if (withdrawalError) throw withdrawalError;
 
-        // Update user's balances
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
@@ -124,15 +123,15 @@ export const CreateTransactionDialog = ({ user, packs, onTransactionCreated }: C
 
           {transactionType === 'investment' && (
             <div>
-              <Label>Pack d'investissement</Label>
+              <Label>Commande</Label>
               <Select onValueChange={setSelectedPack}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez un pack" />
+                  <SelectValue placeholder="Sélectionnez une commande" />
                 </SelectTrigger>
                 <SelectContent>
                   {packs.map((pack) => (
                     <SelectItem key={pack.id} value={pack.id}>
-                      {pack.name} - Min: {pack.min_amount}€
+                      {pack.name} - Min: {pack.target_amount}€
                     </SelectItem>
                   ))}
                 </SelectContent>
