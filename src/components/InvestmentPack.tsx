@@ -129,6 +129,10 @@ export const InvestmentPack = ({
               </p>
             </div>
           )}
+          <div className="text-sm">
+            <p className="text-gray-600">Investissement minimum</p>
+            <p className="font-semibold">5€</p>
+          </div>
           <Button 
             className="w-full" 
             onClick={() => navigate("/payment")}

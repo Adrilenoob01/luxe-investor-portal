@@ -56,6 +56,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
           implementation_date: editingPack.implementation_date,
           end_date: editingPack.end_date,
           category: editingPack.category,
+          collected_amount: editingPack.collected_amount,
         })
         .eq('id', editingPack.id);
 
@@ -76,6 +77,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
         <TableRow>
           <TableHead>Nom</TableHead>
           <TableHead>Montant cible</TableHead>
+          <TableHead>Montant collecté</TableHead>
           <TableHead>Taux de rendement</TableHead>
           <TableHead>Statut</TableHead>
           <TableHead>Catégorie</TableHead>
@@ -87,6 +89,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
           <TableRow key={pack.id}>
             <TableCell>{pack.name}</TableCell>
             <TableCell>{pack.target_amount}€</TableCell>
+            <TableCell>{pack.collected_amount}€</TableCell>
             <TableCell>{pack.return_rate}%</TableCell>
             <TableCell>{pack.status}</TableCell>
             <TableCell>{pack.category}</TableCell>
@@ -112,6 +115,14 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
                       <Textarea
                         value={editingPack?.description || pack.description}
                         onChange={(e) => setEditingPack({ ...pack, description: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Montant collecté</Label>
+                      <Input
+                        type="number"
+                        value={editingPack?.collected_amount || pack.collected_amount}
+                        onChange={(e) => setEditingPack({ ...pack, collected_amount: parseFloat(e.target.value) })}
                       />
                     </div>
                     <div className="space-y-2">
