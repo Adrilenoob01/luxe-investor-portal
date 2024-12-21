@@ -9,46 +9,13 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      investment_packs: {
-        Row: {
-          created_at: string
-          description: string
-          id: string
-          is_active: boolean | null
-          min_amount: number
-          name: string
-          return_rate: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string
-          id?: string
-          is_active?: boolean | null
-          min_amount: number
-          name: string
-          return_rate: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: string
-          is_active?: boolean | null
-          min_amount?: number
-          name?: string
-          return_rate?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       investments: {
         Row: {
           amount: number
           created_at: string
           id: string
-          pack_id: string | null
           payment_method: string
+          project_id: string | null
           status: string
           updated_at: string
           user_id: string | null
@@ -57,8 +24,8 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
-          pack_id?: string | null
           payment_method: string
+          project_id?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -67,18 +34,18 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
-          pack_id?: string | null
           payment_method?: string
+          project_id?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "investments_pack_id_fkey"
-            columns: ["pack_id"]
+            foreignKeyName: "investments_project_id_fkey"
+            columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "investment_packs"
+            referencedRelation: "order_projects"
             referencedColumns: ["id"]
           },
           {
@@ -89,6 +56,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      order_projects: {
+        Row: {
+          category: string | null
+          collected_amount: number
+          created_at: string
+          description: string
+          detailed_description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          implementation_date: string | null
+          is_active: boolean | null
+          location: string | null
+          name: string
+          return_rate: number
+          short_description: string | null
+          status: string
+          target_amount: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          collected_amount?: number
+          created_at?: string
+          description?: string
+          detailed_description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          implementation_date?: string | null
+          is_active?: boolean | null
+          location?: string | null
+          name: string
+          return_rate: number
+          short_description?: string | null
+          status?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          collected_amount?: number
+          created_at?: string
+          description?: string
+          detailed_description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          implementation_date?: string | null
+          is_active?: boolean | null
+          location?: string | null
+          name?: string
+          return_rate?: number
+          short_description?: string | null
+          status?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

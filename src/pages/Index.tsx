@@ -3,18 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { InvestmentPack } from "@/components/InvestmentPack";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/Header";
+import { OrderProject } from "@/types/supabase";
 
 const Index = () => {
-  const { data: packs, isLoading } = useQuery({
-    queryKey: ['investment-packs'],
+  const { data: projects, isLoading } = useQuery({
+    queryKey: ['order-projects'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('investment_packs')
+        .from('order_projects')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as OrderProject[];
     },
   });
 
@@ -39,18 +41,25 @@ const Index = () => {
                 <Skeleton className="h-[200px] w-full" />
               </div>
             ))
-          ) : packs?.length === 0 ? (
+          ) : projects?.length === 0 ? (
             <p className="text-center col-span-full text-gray-500">
-              Aucun pack d'investissement disponible pour le moment.
+              Aucun projet d'investissement disponible pour le moment.
             </p>
           ) : (
-            packs?.map((pack) => (
+            projects?.map((project) => (
               <InvestmentPack
-                key={pack.id}
-                title={pack.name}
-                minAmount={pack.min_amount}
-                returnRate={pack.return_rate}
-                description={pack.description}
+                key={project.id}
+                title={project.name}
+                minAmount={project.target_amount}
+                returnRate={project.return_rate}
+                description={project.description}
+                progress={(project.collected_amount / project.target_amount) * 100}
+                imageUrl={project.image_url}
+                shortDescription={project.short_description}
+                location={project.location}
+                category={project.category}
+                implementationDate={project.implementation_date}
+                endDate={project.end_date}
               />
             ))
           )}
@@ -83,7 +92,7 @@ const Index = () => {
                 Flexibilité
               </h3>
               <p className="text-gray-600">
-                Choisissez le pack qui correspond le mieux à vos besoins.
+                Choisissez le projet qui correspond le mieux à vos objectifs.
               </p>
             </div>
           </div>
