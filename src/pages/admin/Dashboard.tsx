@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     },
   });
 
-  const { data: transactions } = useQuery<Investment[]>({
+  const { data: transactions, refetch: refetchTransactions } = useQuery<Investment[]>({
     queryKey: ['admin-transactions'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -121,7 +121,10 @@ const AdminDashboard = () => {
           )}
 
           {activeTab === 'transactions' && (
-            <TransactionsList transactions={transactions} />
+            <TransactionsList 
+              transactions={transactions} 
+              refetchTransactions={refetchTransactions}
+            />
           )}
         </div>
       </div>

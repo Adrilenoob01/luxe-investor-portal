@@ -40,6 +40,7 @@ export interface Investment {
   payment_method: string;
   created_at: string;
   updated_at: string;
+  is_cancelled: boolean | null;
   profiles?: Profile;
   order_projects?: OrderProject;
 }
