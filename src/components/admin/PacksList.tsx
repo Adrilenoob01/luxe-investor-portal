@@ -57,6 +57,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
           end_date: editingPack.end_date,
           category: editingPack.category,
           collected_amount: editingPack.collected_amount,
+          target_amount: editingPack.target_amount,
         })
         .eq('id', editingPack.id);
 
@@ -115,6 +116,14 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
                       <Textarea
                         value={editingPack?.description || pack.description}
                         onChange={(e) => setEditingPack({ ...pack, description: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Montant cible</Label>
+                      <Input
+                        type="number"
+                        value={editingPack?.target_amount || pack.target_amount}
+                        onChange={(e) => setEditingPack({ ...pack, target_amount: parseFloat(e.target.value) })}
                       />
                     </div>
                     <div className="space-y-2">

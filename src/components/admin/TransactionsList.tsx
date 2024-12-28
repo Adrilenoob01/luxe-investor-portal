@@ -7,12 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { EditTransactionDialog } from "./EditTransactionDialog";
 
 interface TransactionsListProps {
   transactions: Investment[] | null;
+  refetchTransactions: () => void;
 }
 
-export const TransactionsList = ({ transactions }: TransactionsListProps) => {
+export const TransactionsList = ({ transactions, refetchTransactions }: TransactionsListProps) => {
   return (
     <Table>
       <TableHeader>
@@ -23,6 +25,7 @@ export const TransactionsList = ({ transactions }: TransactionsListProps) => {
           <TableHead>Montant</TableHead>
           <TableHead>Statut</TableHead>
           <TableHead>Méthode</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -38,6 +41,12 @@ export const TransactionsList = ({ transactions }: TransactionsListProps) => {
             <TableCell>{transaction.amount}€</TableCell>
             <TableCell>{transaction.status}</TableCell>
             <TableCell>{transaction.payment_method}</TableCell>
+            <TableCell>
+              <EditTransactionDialog 
+                transaction={transaction}
+                onTransactionUpdated={refetchTransactions}
+              />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
