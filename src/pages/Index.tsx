@@ -113,15 +113,14 @@ const Index = () => {
             <div>
               <h4 className="font-semibold text-lg mb-4">Contact</h4>
               <p className="text-gray-600">
-                Email: contact@wearshop-invest.com<br />
+                Email: contact.wearshop@gmail.com<br />
                 Téléphone: +33 1 23 45 67 89
               </p>
             </div>
             <div>
               <h4 className="font-semibold text-lg mb-4">Mentions légales</h4>
               <p className="text-gray-600">
-                © 2024 WearShop Invest. Tous droits réservés.<br />
-                Société immatriculée au RCS.
+                © 2024 WearShop Invest. Tous droits réservés.
               </p>
             </div>
           </div>
