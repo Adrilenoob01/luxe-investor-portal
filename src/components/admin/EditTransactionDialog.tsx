@@ -7,29 +7,46 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Investment } from "@/types/supabase";
+import { Investment, Withdrawal } from "@/types/supabase";
 
 interface EditTransactionDialogProps {
-  transaction: Investment;
+  transaction: Investment | Withdrawal;
+  type: 'investment' | 'withdrawal';
   onTransactionUpdated: () => void;
 }
 
-export const EditTransactionDialog = ({ transaction, onTransactionUpdated }: EditTransactionDialogProps) => {
-  const [editingTransaction, setEditingTransaction] = useState<Investment>(transaction);
+export const EditTransactionDialog = ({ transaction, type, onTransactionUpdated }: EditTransactionDialogProps) => {
+  const [editingTransaction, setEditingTransaction] = useState<Investment | Withdrawal>(transaction);
 
   const handleUpdateTransaction = async () => {
     try {
+      const table = type === 'investment' ? 'investments' : 'withdrawals';
       const { error } = await supabase
-        .from('investments')
+        .from(table)
         .update({
           amount: editingTransaction.amount,
           status: editingTransaction.status,
-          payment_method: editingTransaction.payment_method,
           is_cancelled: editingTransaction.is_cancelled,
+          ...(type === 'investment' && { payment_method: (editingTransaction as Investment).payment_method }),
+          ...(type === 'withdrawal' && { withdrawal_method: (editingTransaction as Withdrawal).withdrawal_method }),
         })
         .eq('id', editingTransaction.id);
 
       if (error) throw error;
+
+      // Update user balance if transaction is cancelled
+      if (editingTransaction.is_cancelled && editingTransaction.status === 'cancelled') {
+        const { error: balanceError } = await supabase
+          .from('profiles')
+          .update({
+            available_balance: type === 'withdrawal' 
+              ? editingTransaction.amount // Add back the amount if withdrawal is cancelled
+              : -editingTransaction.amount // Subtract the amount if investment is cancelled
+          })
+          .eq('id', editingTransaction.user_id);
+
+        if (balanceError) throw balanceError;
+      }
 
       toast.success("Transaction mise à jour avec succès");
       onTransactionUpdated();
@@ -41,8 +58,9 @@ export const EditTransactionDialog = ({ transaction, onTransactionUpdated }: Edi
 
   const handleCancelTransaction = async () => {
     try {
+      const table = type === 'investment' ? 'investments' : 'withdrawals';
       const { error } = await supabase
-        .from('investments')
+        .from(table)
         .update({
           is_cancelled: true,
           status: 'cancelled'
@@ -50,6 +68,18 @@ export const EditTransactionDialog = ({ transaction, onTransactionUpdated }: Edi
         .eq('id', transaction.id);
 
       if (error) throw error;
+
+      // Update user balance
+      const { error: balanceError } = await supabase
+        .from('profiles')
+        .update({
+          available_balance: type === 'withdrawal' 
+            ? transaction.amount // Add back the amount if withdrawal is cancelled
+            : -transaction.amount // Subtract the amount if investment is cancelled
+        })
+        .eq('id', transaction.user_id);
+
+      if (balanceError) throw balanceError;
 
       toast.success("Transaction annulée avec succès");
       onTransactionUpdated();
@@ -93,22 +123,41 @@ export const EditTransactionDialog = ({ transaction, onTransactionUpdated }: Edi
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>Méthode de paiement</Label>
-            <Select
-              value={editingTransaction.payment_method}
-              onValueChange={(value) => setEditingTransaction({ ...editingTransaction, payment_method: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez une méthode" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="card">Carte bancaire</SelectItem>
-                <SelectItem value="paypal">PayPal</SelectItem>
-                <SelectItem value="cash">Espèces</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {type === 'investment' && (
+            <div className="space-y-2">
+              <Label>Méthode de paiement</Label>
+              <Select
+                value={(editingTransaction as Investment).payment_method}
+                onValueChange={(value) => setEditingTransaction({ ...editingTransaction, payment_method: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez une méthode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="card">Carte bancaire</SelectItem>
+                  <SelectItem value="paypal">PayPal</SelectItem>
+                  <SelectItem value="cash">Espèces</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {type === 'withdrawal' && (
+            <div className="space-y-2">
+              <Label>Méthode de retrait</Label>
+              <Select
+                value={(editingTransaction as Withdrawal).withdrawal_method || ''}
+                onValueChange={(value) => setEditingTransaction({ ...editingTransaction, withdrawal_method: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez une méthode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
+                  <SelectItem value="paypal">PayPal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="flex justify-between">
             <Button onClick={handleUpdateTransaction}>Enregistrer</Button>
             <AlertDialog>
@@ -119,7 +168,8 @@ export const EditTransactionDialog = ({ transaction, onTransactionUpdated }: Edi
                 <AlertDialogHeader>
                   <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Cette action est irréversible. La transaction sera marquée comme annulée.
+                    Cette action est irréversible. La transaction sera marquée comme annulée 
+                    {type === 'withdrawal' ? " et le montant sera recrédité sur le compte du client." : " et le montant sera débité du compte du client."}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

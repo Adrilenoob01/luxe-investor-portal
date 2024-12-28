@@ -1,4 +1,4 @@
-import { Investment } from "@/types/supabase";
+import { Investment, Withdrawal } from "@/types/supabase";
 import {
   Table,
   TableBody,
@@ -10,40 +10,87 @@ import {
 import { EditTransactionDialog } from "./EditTransactionDialog";
 
 interface TransactionsListProps {
-  transactions: Investment[] | null;
+  investments: Investment[] | null;
+  withdrawals: Withdrawal[] | null;
   refetchTransactions: () => void;
 }
 
-export const TransactionsList = ({ transactions, refetchTransactions }: TransactionsListProps) => {
+type CombinedTransaction = {
+  id: string;
+  type: 'investment' | 'withdrawal';
+  date: Date;
+  user: {
+    first_name: string | null;
+    last_name: string | null;
+  };
+  amount: number;
+  status: string;
+  details: string;
+  originalData: Investment | Withdrawal;
+};
+
+export const TransactionsList = ({ investments, withdrawals, refetchTransactions }: TransactionsListProps) => {
+  const combinedTransactions: CombinedTransaction[] = [
+    ...(investments?.map(inv => ({
+      id: inv.id,
+      type: 'investment' as const,
+      date: new Date(inv.created_at),
+      user: {
+        first_name: inv.profiles?.first_name,
+        last_name: inv.profiles?.last_name,
+      },
+      amount: inv.amount,
+      status: inv.status,
+      details: `Investissement - ${inv.order_projects?.name || 'N/A'}`,
+      originalData: inv,
+    })) || []),
+    ...(withdrawals?.map(w => ({
+      id: w.id,
+      type: 'withdrawal' as const,
+      date: new Date(w.created_at),
+      user: {
+        first_name: w.profiles?.first_name,
+        last_name: w.profiles?.last_name,
+      },
+      amount: w.amount,
+      status: w.status,
+      details: `Retrait - ${w.withdrawal_method || 'N/A'}`,
+      originalData: w,
+    })) || []),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Date</TableHead>
-          <TableHead>Utilisateur</TableHead>
-          <TableHead>Commande</TableHead>
+          <TableHead>Client</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Détails</TableHead>
           <TableHead>Montant</TableHead>
           <TableHead>Statut</TableHead>
-          <TableHead>Méthode</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {transactions?.map((transaction) => (
-          <TableRow key={transaction.id}>
+        {combinedTransactions.map((transaction) => (
+          <TableRow key={`${transaction.type}-${transaction.id}`}>
             <TableCell>
-              {new Date(transaction.created_at).toLocaleDateString()}
+              {transaction.date.toLocaleDateString()}
             </TableCell>
             <TableCell>
-              {transaction.profiles?.first_name} {transaction.profiles?.last_name}
+              {transaction.user.first_name} {transaction.user.last_name}
             </TableCell>
-            <TableCell>{transaction.order_projects?.name}</TableCell>
+            <TableCell>
+              {transaction.type === 'investment' ? 'Investissement' : 'Retrait'}
+            </TableCell>
+            <TableCell>{transaction.details}</TableCell>
             <TableCell>{transaction.amount}€</TableCell>
             <TableCell>{transaction.status}</TableCell>
-            <TableCell>{transaction.payment_method}</TableCell>
             <TableCell>
               <EditTransactionDialog 
-                transaction={transaction}
+                transaction={transaction.originalData}
+                type={transaction.type}
                 onTransactionUpdated={refetchTransactions}
               />
             </TableCell>

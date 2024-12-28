@@ -9,7 +9,7 @@ import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
 import { CreateOrderDialog } from "@/components/admin/CreateOrderDialog";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { TabNavigation } from "@/components/admin/TabNavigation";
-import { Profile, OrderProject, Investment } from "@/types/supabase";
+import { Profile, OrderProject, Investment, Withdrawal } from "@/types/supabase";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -46,8 +46,8 @@ const AdminDashboard = () => {
     },
   });
 
-  const { data: transactions, refetch: refetchTransactions } = useQuery<Investment[]>({
-    queryKey: ['admin-transactions'],
+  const { data: investments, refetch: refetchInvestments } = useQuery<Investment[]>({
+    queryKey: ['admin-investments'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('investments')
@@ -56,39 +56,40 @@ const AdminDashboard = () => {
           profiles (
             id,
             first_name,
-            last_name,
-            address,
-            is_admin,
-            available_balance,
-            invested_amount,
-            email,
-            created_at,
-            updated_at
+            last_name
           ),
           order_projects (
             id,
-            name,
-            target_amount,
-            return_rate,
-            is_active,
-            created_at,
-            updated_at,
-            description,
-            collected_amount,
-            implementation_date,
-            end_date,
-            status,
-            image_url,
-            short_description,
-            detailed_description,
-            location,
-            category
+            name
           )
         `);
       if (error) throw error;
       return data;
     },
   });
+
+  const { data: withdrawals, refetch: refetchWithdrawals } = useQuery<Withdrawal[]>({
+    queryKey: ['admin-withdrawals'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('withdrawals')
+        .select(`
+          *,
+          profiles (
+            id,
+            first_name,
+            last_name
+          )
+        `);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const refetchTransactions = () => {
+    refetchInvestments();
+    refetchWithdrawals();
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("isAdminAuthenticated");
@@ -122,7 +123,8 @@ const AdminDashboard = () => {
 
           {activeTab === 'transactions' && (
             <TransactionsList 
-              transactions={transactions} 
+              investments={investments}
+              withdrawals={withdrawals}
               refetchTransactions={refetchTransactions}
             />
           )}
