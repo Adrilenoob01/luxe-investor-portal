@@ -113,8 +113,7 @@ const Index = () => {
             <div>
               <h4 className="font-semibold text-lg mb-4">Contact</h4>
               <p className="text-gray-600">
-                Email: contact.wearshop@gmail.com<br />
-                Téléphone: +33 1 23 45 67 89
+                Email: contact.wearshop@gmail.com
               </p>
             </div>
             <div>
