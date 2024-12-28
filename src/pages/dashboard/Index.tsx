@@ -13,16 +13,16 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Header } from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ProfileForm } from "@/components/ProfileForm";
-import { Investment, Profile } from "@/types/supabase";
+import { Button } from "@/components/ui/button";
+import { Investment, Profile, Withdrawal } from "@/types/supabase";
+import { WithdrawalRequestDialog } from "@/components/dashboard/WithdrawalRequestDialog";
+import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -88,6 +88,22 @@ const Dashboard = () => {
     },
   });
 
+  const { data: withdrawals, isLoading: withdrawalsLoading, refetch: refetchWithdrawals } = useQuery<Withdrawal[]>({
+    queryKey: ["withdrawals"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("withdrawals")
+        .select("*")
+        .eq("user_id", session.user.id);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Calculate portfolio metrics
   const totalInvested = investments?.reduce((sum, inv) => sum + Number(inv.amount), 0) || 0;
   const estimatedReturns = investments?.reduce((sum, inv) => {
@@ -105,35 +121,7 @@ const Dashboard = () => {
     { month: "Jun", value: totalInvested * 1.10 },
   ];
 
-  const handleWithdrawalRequest = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) throw new Error("Not authenticated");
-
-      const { error } = await supabase
-        .from("withdrawals")
-        .insert({
-          user_id: session.user.id,
-          amount: estimatedReturns,
-          status: "pending"
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Demande de retrait soumise",
-        description: "Votre demande de retrait a été soumise pour traitement.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Échec de la soumission de la demande de retrait. Veuillez réessayer.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (profileLoading || investmentsLoading) {
+  if (profileLoading || investmentsLoading || withdrawalsLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -183,7 +171,7 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Évolution du portefeuille</h3>
             <div className="h-[300px]">
@@ -221,17 +209,23 @@ const Dashboard = () => {
                   <p className="font-semibold">{Number(investment.amount).toLocaleString()}€</p>
                 </div>
               ))}
+              {(!investments || investments.length === 0) && (
+                <p className="text-center text-gray-500">Aucun investissement actif</p>
+              )}
             </div>
           </Card>
         </div>
 
+        <TransactionHistory 
+          investments={investments || []} 
+          withdrawals={withdrawals || []} 
+        />
+
         <div className="mt-8 flex justify-end">
-          <Button
-            onClick={handleWithdrawalRequest}
-            disabled={estimatedReturns <= 0}
-          >
-            Demander un retrait
-          </Button>
+          <WithdrawalRequestDialog
+            availableBalance={profile?.available_balance || 0}
+            onRequestSubmitted={refetchWithdrawals}
+          />
         </div>
       </main>
     </div>

@@ -43,3 +43,14 @@ export interface Investment {
   profiles?: Profile;
   order_projects?: OrderProject;
 }
+
+export interface Withdrawal {
+  id: string;
+  user_id: string | null;
+  amount: number;
+  status: string;
+  withdrawal_method: string | null;
+  created_at: string;
+  updated_at: string;
+  is_cancelled: boolean | null;
+}
