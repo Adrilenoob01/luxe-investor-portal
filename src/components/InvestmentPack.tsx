@@ -89,6 +89,7 @@ export const InvestmentPack = ({
         {shortDescription && (
           <p className="text-gray-600 text-sm mb-3">{shortDescription}</p>
         )}
+        <p className="text-gray-600 text-sm mb-4">{description}</p>
         <div className="space-y-4">
           <div>
             <div className="flex justify-between text-sm mb-1">
@@ -138,7 +139,11 @@ export const InvestmentPack = ({
             onClick={() => navigate("/payment")}
             disabled={status === 'completed' || status === 'upcoming'}
           >
-            Investir
+            {status === 'completed' 
+              ? 'Objectif atteint' 
+              : status === 'upcoming' 
+                ? 'Prochainement' 
+                : 'Investir'}
           </Button>
         </div>
       </div>
