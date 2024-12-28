@@ -36,8 +36,8 @@ export const TransactionsList = ({ investments, withdrawals, refetchTransactions
       type: 'investment' as const,
       date: new Date(inv.created_at),
       user: {
-        first_name: inv.profiles?.first_name,
-        last_name: inv.profiles?.last_name,
+        first_name: inv.profiles?.first_name ?? null,
+        last_name: inv.profiles?.last_name ?? null,
       },
       amount: inv.amount,
       status: inv.status,
@@ -49,8 +49,8 @@ export const TransactionsList = ({ investments, withdrawals, refetchTransactions
       type: 'withdrawal' as const,
       date: new Date(w.created_at),
       user: {
-        first_name: w.profiles?.first_name,
-        last_name: w.profiles?.last_name,
+        first_name: w.profiles?.first_name ?? null,
+        last_name: w.profiles?.last_name ?? null,
       },
       amount: w.amount,
       status: w.status,
