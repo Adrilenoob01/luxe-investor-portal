@@ -7,13 +7,14 @@ import { OrderProject } from "@/types/supabase";
 
 const Index = () => {
   const { data: projects, isLoading } = useQuery({
-    queryKey: ['order-projects'],
+    queryKey: ['latest-projects'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('order_projects')
         .select('*')
         .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(3);
       
       if (error) throw error;
       return data as OrderProject[];
@@ -60,6 +61,7 @@ const Index = () => {
                 category={project.category}
                 implementationDate={project.implementation_date}
                 endDate={project.end_date}
+                status={project.status}
               />
             ))
           )}
@@ -98,6 +100,33 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      <footer className="bg-white mt-16 py-12 border-t">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <h4 className="font-semibold text-lg mb-4">À propos</h4>
+              <p className="text-gray-600">
+                WearShop Invest est une plateforme innovante permettant d'investir dans le marché du luxe.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-lg mb-4">Contact</h4>
+              <p className="text-gray-600">
+                Email: contact@wearshop-invest.com<br />
+                Téléphone: +33 1 23 45 67 89
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-lg mb-4">Mentions légales</h4>
+              <p className="text-gray-600">
+                © 2024 WearShop Invest. Tous droits réservés.<br />
+                Société immatriculée au RCS.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
