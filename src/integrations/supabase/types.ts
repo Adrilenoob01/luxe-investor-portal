@@ -14,6 +14,7 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          is_cancelled: boolean | null
           payment_method: string
           project_id: string | null
           status: string
@@ -24,6 +25,7 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
+          is_cancelled?: boolean | null
           payment_method: string
           project_id?: string | null
           status?: string
@@ -34,6 +36,7 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          is_cancelled?: boolean | null
           payment_method?: string
           project_id?: string | null
           status?: string
@@ -161,25 +164,31 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          is_cancelled: boolean | null
           status: string
           updated_at: string
           user_id: string | null
+          withdrawal_method: string | null
         }
         Insert: {
           amount: number
           created_at?: string
           id?: string
+          is_cancelled?: boolean | null
           status?: string
           updated_at?: string
           user_id?: string | null
+          withdrawal_method?: string | null
         }
         Update: {
           amount?: number
           created_at?: string
           id?: string
+          is_cancelled?: boolean | null
           status?: string
           updated_at?: string
           user_id?: string | null
+          withdrawal_method?: string | null
         }
         Relationships: [
           {
