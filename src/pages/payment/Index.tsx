@@ -128,7 +128,7 @@ export default function Payment() {
 
               <div className="space-y-4">
                 <PayPalScriptProvider options={{ 
-                  clientId: process.env.PAYPAL_CLIENT_ID || "test",
+                  clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "test",
                   currency: "EUR",
                   intent: "CAPTURE"
                 }}>
