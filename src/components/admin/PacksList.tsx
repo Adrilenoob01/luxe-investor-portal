@@ -9,14 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
+import { EditOrderDialog } from "./EditOrderDialog";
 
 interface PacksListProps {
   packs: OrderProject[] | null;
@@ -24,8 +19,6 @@ interface PacksListProps {
 }
 
 export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
-  const [editingPack, setEditingPack] = useState<OrderProject | null>(null);
-
   const handleDeletePack = async (packId: string) => {
     try {
       const { error } = await supabase
@@ -43,29 +36,26 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
     }
   };
 
-  const handleUpdatePack = async () => {
-    if (!editingPack) return;
-
+  const handleUpdatePack = async (updatedPack: OrderProject) => {
     try {
       const { error } = await supabase
         .from('order_projects')
         .update({
-          name: editingPack.name,
-          description: editingPack.description,
-          status: editingPack.status,
-          implementation_date: editingPack.implementation_date,
-          end_date: editingPack.end_date,
-          category: editingPack.category,
-          collected_amount: editingPack.collected_amount,
-          target_amount: editingPack.target_amount,
+          name: updatedPack.name,
+          description: updatedPack.description,
+          status: updatedPack.status,
+          implementation_date: updatedPack.implementation_date,
+          end_date: updatedPack.end_date,
+          collected_amount: updatedPack.collected_amount,
+          target_amount: updatedPack.target_amount,
+          return_rate: updatedPack.return_rate,
         })
-        .eq('id', editingPack.id);
+        .eq('id', updatedPack.id);
 
       if (error) throw error;
 
       toast.success("Commande mise à jour avec succès");
       refetchPacks();
-      setEditingPack(null);
     } catch (error) {
       console.error('Error updating pack:', error);
       toast.error("Erreur lors de la mise à jour de la commande");
@@ -81,7 +71,6 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
           <TableHead>Montant collecté</TableHead>
           <TableHead>Taux de rendement</TableHead>
           <TableHead>Statut</TableHead>
-          <TableHead>Catégorie</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -93,91 +82,8 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
             <TableCell>{pack.collected_amount}€</TableCell>
             <TableCell>{pack.return_rate}%</TableCell>
             <TableCell>{pack.status}</TableCell>
-            <TableCell>{pack.category}</TableCell>
             <TableCell className="space-x-2">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">Modifier</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Modifier la commande</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Nom</Label>
-                      <Input
-                        value={editingPack?.name || pack.name}
-                        onChange={(e) => setEditingPack({ ...pack, name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Description</Label>
-                      <Textarea
-                        value={editingPack?.description || pack.description}
-                        onChange={(e) => setEditingPack({ ...pack, description: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Montant cible</Label>
-                      <Input
-                        type="number"
-                        value={editingPack?.target_amount || pack.target_amount}
-                        onChange={(e) => setEditingPack({ ...pack, target_amount: parseFloat(e.target.value) })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Montant collecté</Label>
-                      <Input
-                        type="number"
-                        value={editingPack?.collected_amount || pack.collected_amount}
-                        onChange={(e) => setEditingPack({ ...pack, collected_amount: parseFloat(e.target.value) })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Statut</Label>
-                      <Select
-                        value={editingPack?.status || pack.status}
-                        onValueChange={(value) => setEditingPack({ ...pack, status: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionnez un statut" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="collecting">En cours</SelectItem>
-                          <SelectItem value="completed">Terminée</SelectItem>
-                          <SelectItem value="upcoming">Prochainement</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Catégorie</Label>
-                      <Input
-                        value={editingPack?.category || pack.category || ''}
-                        onChange={(e) => setEditingPack({ ...pack, category: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Date de début</Label>
-                      <Input
-                        type="date"
-                        value={editingPack?.implementation_date?.split('T')[0] || pack.implementation_date?.split('T')[0] || ''}
-                        onChange={(e) => setEditingPack({ ...pack, implementation_date: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Date de fin</Label>
-                      <Input
-                        type="date"
-                        value={editingPack?.end_date?.split('T')[0] || pack.end_date?.split('T')[0] || ''}
-                        onChange={(e) => setEditingPack({ ...pack, end_date: e.target.value })}
-                      />
-                    </div>
-                    <Button onClick={handleUpdatePack}>Enregistrer</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-
+              <EditOrderDialog pack={pack} onUpdate={handleUpdatePack} />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm">Supprimer</Button>
