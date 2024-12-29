@@ -16,14 +16,11 @@ import {
 import { OrderProject } from "@/types/supabase";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-const PAYPAL_CLIENT_ID = "test"; // We'll need to set this up in Supabase secrets
-
 export default function Payment() {
   const navigate = useNavigate();
   const [packs, setPacks] = useState<OrderProject[]>([]);
   const [selectedPack, setSelectedPack] = useState<OrderProject | null>(null);
   const [amount, setAmount] = useState<number>(0);
-  const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -131,14 +128,16 @@ export default function Payment() {
 
               <div className="space-y-4">
                 <PayPalScriptProvider options={{ 
-                  "client-id": PAYPAL_CLIENT_ID,
-                  currency: "EUR"
+                  clientId: process.env.PAYPAL_CLIENT_ID || "test",
+                  currency: "EUR",
+                  intent: "CAPTURE"
                 }}>
                   <PayPalButtons
                     disabled={isProcessing || amount < selectedPack.target_amount}
                     style={{ layout: "vertical" }}
                     createOrder={(data, actions) => {
                       return actions.order.create({
+                        intent: "CAPTURE",
                         purchase_units: [
                           {
                             amount: {
