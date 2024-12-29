@@ -14,6 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OrderProject } from "@/types/supabase";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+
+const PAYPAL_CLIENT_ID = "test"; // We'll need to set this up in Supabase secrets
 
 export default function Payment() {
   const navigate = useNavigate();
@@ -21,6 +24,7 @@ export default function Payment() {
   const [selectedPack, setSelectedPack] = useState<OrderProject | null>(null);
   const [amount, setAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     fetchPacks();
@@ -57,23 +61,8 @@ export default function Payment() {
     }
   };
 
-  const handleInvest = async () => {
+  const createInvestment = async (paymentDetails: any) => {
     try {
-      if (!selectedPack) {
-        toast.error("Veuillez sélectionner un pack d'investissement");
-        return;
-      }
-
-      if (amount < selectedPack.target_amount) {
-        toast.error(`Le montant minimum pour ce pack est de ${selectedPack.target_amount}€`);
-        return;
-      }
-
-      if (!paymentMethod) {
-        toast.error("Veuillez sélectionner une méthode de paiement");
-        return;
-      }
-
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -85,10 +74,11 @@ export default function Payment() {
         .from('investments')
         .insert({
           user_id: session.user.id,
-          project_id: selectedPack.id,
+          project_id: selectedPack?.id,
           amount: amount,
-          payment_method: paymentMethod,
-          status: 'pending'
+          payment_method: 'paypal',
+          status: 'completed',
+          payment_details: paymentDetails
         });
 
       if (error) throw error;
@@ -139,23 +129,46 @@ export default function Payment() {
                 </p>
               </div>
 
-              <div>
-                <Label htmlFor="paymentMethod">Méthode de paiement</Label>
-                <Select onValueChange={setPaymentMethod}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez une méthode de paiement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="card">Carte bancaire</SelectItem>
-                    <SelectItem value="paypal">PayPal</SelectItem>
-                    <SelectItem value="cash">Espèces</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-4">
+                <PayPalScriptProvider options={{ 
+                  "client-id": PAYPAL_CLIENT_ID,
+                  currency: "EUR"
+                }}>
+                  <PayPalButtons
+                    disabled={isProcessing || amount < selectedPack.target_amount}
+                    style={{ layout: "vertical" }}
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        purchase_units: [
+                          {
+                            amount: {
+                              value: amount.toString(),
+                              currency_code: "EUR"
+                            },
+                            description: `Investissement - ${selectedPack.name}`
+                          }
+                        ]
+                      });
+                    }}
+                    onApprove={async (data, actions) => {
+                      setIsProcessing(true);
+                      try {
+                        const details = await actions.order?.capture();
+                        await createInvestment(details);
+                      } catch (error) {
+                        console.error('Payment failed:', error);
+                        toast.error("Le paiement a échoué. Veuillez réessayer.");
+                      } finally {
+                        setIsProcessing(false);
+                      }
+                    }}
+                    onError={() => {
+                      toast.error("Une erreur est survenue lors du paiement. Veuillez réessayer.");
+                      setIsProcessing(false);
+                    }}
+                  />
+                </PayPalScriptProvider>
               </div>
-
-              <Button onClick={handleInvest} className="w-full">
-                Investir maintenant
-              </Button>
             </>
           )}
         </div>
