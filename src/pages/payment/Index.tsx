@@ -55,7 +55,7 @@ export default function Payment() {
     const pack = packs.find(p => p.id === packId);
     setSelectedPack(pack || null);
     if (pack) {
-      setAmount(pack.target_amount);
+      setAmount(5); // Set default minimum amount
     }
   };
 
@@ -75,8 +75,7 @@ export default function Payment() {
           project_id: selectedPack?.id,
           amount: amount,
           payment_method: 'paypal',
-          status: 'completed',
-          payment_details: paymentDetails
+          status: 'completed'
         });
 
       if (error) throw error;
@@ -97,7 +96,7 @@ export default function Payment() {
   const isValidAmount = () => {
     if (!selectedPack) return false;
     const remainingAmount = getRemainingAmount();
-    return amount >= selectedPack.target_amount && amount <= remainingAmount;
+    return amount >= 5 && amount <= remainingAmount;
   };
 
   return (
@@ -115,7 +114,7 @@ export default function Payment() {
               <SelectContent>
                 {packs.map((pack) => (
                   <SelectItem key={pack.id} value={pack.id}>
-                    {pack.name} - Min: {pack.target_amount}€ ({pack.return_rate}% de rendement)
+                    {pack.name} - Min: 5€ ({pack.return_rate}% de rendement)
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -129,13 +128,13 @@ export default function Payment() {
                 <Input
                   id="amount"
                   type="number"
-                  min={selectedPack.target_amount}
+                  min={5}
                   max={getRemainingAmount()}
                   value={amount}
-                  onChange={(e) => setAmount(parseFloat(e.target.value))}
+                  onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  Montant minimum : {selectedPack.target_amount}€
+                  Montant minimum : 5€
                   <br />
                   Montant restant à collecter : {getRemainingAmount()}€
                 </p>
@@ -144,7 +143,7 @@ export default function Payment() {
               {isValidAmount() && (
                 <div className="space-y-4">
                   <PayPalScriptProvider options={{ 
-                    clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "test",
+                    clientId: "test",
                     currency: "EUR",
                     intent: "CAPTURE"
                   }}>
