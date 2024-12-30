@@ -40,6 +40,7 @@ export default function Payment() {
       const { data, error } = await supabase
         .from('order_projects')
         .select('*')
+        .eq('status', 'collecting')
         .eq('is_active', true);
 
       if (error) throw error;
@@ -88,6 +89,17 @@ export default function Payment() {
     }
   };
 
+  const getRemainingAmount = () => {
+    if (!selectedPack) return 0;
+    return selectedPack.target_amount - selectedPack.collected_amount;
+  };
+
+  const isValidAmount = () => {
+    if (!selectedPack) return false;
+    const remainingAmount = getRemainingAmount();
+    return amount >= selectedPack.target_amount && amount <= remainingAmount;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <Card className="max-w-md mx-auto p-6">
@@ -118,11 +130,14 @@ export default function Payment() {
                   id="amount"
                   type="number"
                   min={selectedPack.target_amount}
+                  max={getRemainingAmount()}
                   value={amount}
                   onChange={(e) => setAmount(parseFloat(e.target.value))}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
                   Montant minimum : {selectedPack.target_amount}€
+                  <br />
+                  Montant restant à collecter : {getRemainingAmount()}€
                 </p>
               </div>
 
@@ -133,7 +148,7 @@ export default function Payment() {
                   intent: "CAPTURE"
                 }}>
                   <PayPalButtons
-                    disabled={isProcessing || amount < selectedPack.target_amount}
+                    disabled={isProcessing || !isValidAmount()}
                     style={{ layout: "vertical" }}
                     createOrder={(data, actions) => {
                       return actions.order.create({
