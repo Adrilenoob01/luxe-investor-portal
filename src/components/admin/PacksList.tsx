@@ -21,12 +21,24 @@ interface PacksListProps {
 export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
   const handleDeletePack = async (packId: string) => {
     try {
-      const { error } = await supabase
+      // D'abord, supprimer tous les investissements associés
+      const { error: investmentsError } = await supabase
+        .from('investments')
+        .delete()
+        .eq('project_id', packId);
+
+      if (investmentsError) {
+        console.error('Error deleting investments:', investmentsError);
+        throw investmentsError;
+      }
+
+      // Ensuite, supprimer le projet
+      const { error: packError } = await supabase
         .from('order_projects')
         .delete()
         .eq('id', packId);
 
-      if (error) throw error;
+      if (packError) throw packError;
 
       toast.success("Commande supprimée avec succès");
       refetchPacks();
@@ -92,7 +104,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Cette action est irréversible. Cela supprimera définitivement la commande.
+                      Cette action est irréversible. Cela supprimera définitivement la commande et tous les investissements associés.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
