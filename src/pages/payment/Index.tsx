@@ -23,14 +23,14 @@ export default function Payment() {
 
   const fetchPaypalClientId = async () => {
     try {
-      const { data: { value }, error } = await supabase
-        .from('secrets')
-        .select('value')
-        .eq('name', 'PAYPAL_CLIENT_ID')
-        .single();
-
+      const { data, error } = await supabase.functions.invoke('get-paypal-client-id');
+      
       if (error) throw error;
-      setPaypalClientId(value);
+      if (data?.clientId) {
+        setPaypalClientId(data.clientId);
+      } else {
+        throw new Error('PayPal Client ID not found');
+      }
     } catch (error) {
       console.error('Error fetching PayPal client ID:', error);
       toast.error("Erreur lors du chargement de la configuration PayPal");
