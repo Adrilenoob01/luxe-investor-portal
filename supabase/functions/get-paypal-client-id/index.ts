@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,24 +13,18 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    )
-
-    const { data: secretData, error: secretError } = await supabaseClient
-      .from('_secrets')
-      .select('value')
-      .eq('name', 'PAYPAL_CLIENT_ID')
-      .single()
-
-    if (secretError) throw secretError
+    const clientId = Deno.env.get('PAYPAL_CLIENT_ID');
+    
+    if (!clientId) {
+      throw new Error('PayPal Client ID not found in environment variables');
+    }
 
     return new Response(
-      JSON.stringify({ clientId: secretData.value }),
+      JSON.stringify({ clientId }),
       { headers: corsHeaders },
     )
   } catch (error) {
+    console.error('Error fetching PayPal client ID:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
