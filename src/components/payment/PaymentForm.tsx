@@ -36,6 +36,19 @@ export const PaymentForm = ({
 }: PaymentFormProps) => {
   const [paypalError, setPaypalError] = useState<string | null>(null);
 
+  const isAmountValid = () => {
+    if (!selectedPack) return false;
+    const remainingAmount = getRemainingAmount();
+    return amount >= selectedPack.min_amount && amount <= remainingAmount;
+  };
+
+  console.log("PayPal button rendering with:", {
+    selectedPack,
+    amount,
+    isAmountValid: isAmountValid(),
+    isProcessing
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -84,9 +97,12 @@ export const PaymentForm = ({
             )}
             
             <PayPalButtons
-              disabled={isProcessing}
               style={{ layout: "vertical" }}
+              disabled={isProcessing}
               createOrder={(data, actions) => {
+                if (!isAmountValid()) {
+                  return Promise.reject(new Error("Montant invalide"));
+                }
                 return actions.order.create({
                   intent: "CAPTURE",
                   purchase_units: [
