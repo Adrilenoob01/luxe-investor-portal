@@ -13,11 +13,29 @@ export default function Payment() {
   const [selectedPack, setSelectedPack] = useState<OrderProject | null>(null);
   const [amount, setAmount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paypalClientId, setPaypalClientId] = useState<string>("");
 
   useEffect(() => {
     fetchPacks();
     checkAuth();
+    fetchPaypalClientId();
   }, []);
+
+  const fetchPaypalClientId = async () => {
+    try {
+      const { data: { value }, error } = await supabase
+        .from('secrets')
+        .select('value')
+        .eq('name', 'PAYPAL_CLIENT_ID')
+        .single();
+
+      if (error) throw error;
+      setPaypalClientId(value);
+    } catch (error) {
+      console.error('Error fetching PayPal client ID:', error);
+      toast.error("Erreur lors du chargement de la configuration PayPal");
+    }
+  };
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -87,13 +105,25 @@ export default function Payment() {
     return selectedPack.target_amount - selectedPack.collected_amount;
   };
 
+  if (!paypalClientId) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <Card className="max-w-md mx-auto p-6">
+          <p className="text-center text-gray-500">
+            Chargement de la configuration PayPal...
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <Card className="max-w-md mx-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Investir</h1>
         
         <PayPalScriptProvider options={{ 
-          clientId: "test",
+          clientId: paypalClientId,
           currency: "EUR",
           intent: "CAPTURE"
         }}>
