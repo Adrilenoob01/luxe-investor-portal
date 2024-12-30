@@ -16,4 +16,5 @@ export interface OrderProject {
   category: string | null;
   created_at: string;
   updated_at: string;
+  min_amount: number;
 }
