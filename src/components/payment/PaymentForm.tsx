@@ -47,7 +47,7 @@ export const PaymentForm = ({
           <SelectContent>
             {packs.map((pack) => (
               <SelectItem key={pack.id} value={pack.id}>
-                {pack.name} - Min: {pack.min_amount}€ ({pack.return_rate}% de rendement)
+                {pack.name} - Min: {pack.min_amount}€
               </SelectItem>
             ))}
           </SelectContent>
