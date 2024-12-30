@@ -13,7 +13,7 @@ import { OrderProject } from "@/types/supabase";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface PaymentFormProps {
   packs: OrderProject[];
@@ -43,6 +43,13 @@ export const PaymentForm = ({
     if (!selectedPack) return false;
     const remainingAmount = getRemainingAmount();
     return amount >= selectedPack.min_amount && amount <= remainingAmount;
+  };
+
+  const handleProceedClick = () => {
+    console.log("Opening PayPal dialog");
+    if (isAmountValid()) {
+      setShowPaypalDialog(true);
+    }
   };
 
   return (
@@ -92,7 +99,7 @@ export const PaymentForm = ({
           )}
 
           <Button 
-            onClick={() => setShowPaypalDialog(true)}
+            onClick={handleProceedClick}
             disabled={!isAmountValid() || isProcessing}
             className="w-full"
           >
@@ -123,6 +130,7 @@ export const PaymentForm = ({
                   style={{ layout: "vertical" }}
                   disabled={isProcessing}
                   createOrder={(data, actions) => {
+                    console.log("Creating PayPal order");
                     if (!isAmountValid()) {
                       return Promise.reject(new Error("Montant invalide"));
                     }
@@ -140,6 +148,7 @@ export const PaymentForm = ({
                     });
                   }}
                   onApprove={async (data, actions) => {
+                    console.log("PayPal order approved");
                     if (actions.order) {
                       const details = await actions.order.capture();
                       await createInvestment(details);
