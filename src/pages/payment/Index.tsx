@@ -55,7 +55,7 @@ export default function Payment() {
     const pack = packs.find(p => p.id === packId);
     setSelectedPack(pack || null);
     if (pack) {
-      setAmount(5); // Set default minimum amount
+      setAmount(pack.min_amount); // Utilise le montant minimal défini pour ce pack
     }
   };
 
@@ -96,7 +96,7 @@ export default function Payment() {
   const isValidAmount = () => {
     if (!selectedPack) return false;
     const remainingAmount = getRemainingAmount();
-    return amount >= 5 && amount <= remainingAmount;
+    return amount >= selectedPack.min_amount && amount <= remainingAmount;
   };
 
   return (
@@ -114,7 +114,7 @@ export default function Payment() {
               <SelectContent>
                 {packs.map((pack) => (
                   <SelectItem key={pack.id} value={pack.id}>
-                    {pack.name} - Min: 5€ ({pack.return_rate}% de rendement)
+                    {pack.name} - Min: {pack.min_amount}€ ({pack.return_rate}% de rendement)
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -128,13 +128,13 @@ export default function Payment() {
                 <Input
                   id="amount"
                   type="number"
-                  min={5}
+                  min={selectedPack.min_amount}
                   max={getRemainingAmount()}
                   value={amount}
                   onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  Montant minimum : 5€
+                  Montant minimum : {selectedPack.min_amount}€
                   <br />
                   Montant restant à collecter : {getRemainingAmount()}€
                 </p>
