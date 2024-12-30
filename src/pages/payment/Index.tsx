@@ -1,20 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { OrderProject } from "@/types/supabase";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { PaymentForm } from "@/components/payment/PaymentForm";
 
 export default function Payment() {
   const navigate = useNavigate();
@@ -61,6 +52,7 @@ export default function Payment() {
 
   const createInvestment = async (paymentDetails: any) => {
     try {
+      setIsProcessing(true);
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -85,6 +77,8 @@ export default function Payment() {
     } catch (error) {
       console.error('Error creating investment:', error);
       toast.error("Erreur lors de la création de l'investissement");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -93,108 +87,27 @@ export default function Payment() {
     return selectedPack.target_amount - selectedPack.collected_amount;
   };
 
-  const isValidAmount = () => {
-    if (!selectedPack) return false;
-    const remainingAmount = getRemainingAmount();
-    // Conversion explicite en nombre pour la comparaison
-    const numericAmount = Number(amount);
-    console.log('Validation amount:', {
-      amount: numericAmount,
-      minAmount: selectedPack.min_amount,
-      remainingAmount,
-      isValid: numericAmount >= selectedPack.min_amount && numericAmount <= remainingAmount
-    });
-    return numericAmount >= selectedPack.min_amount && numericAmount <= remainingAmount;
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <Card className="max-w-md mx-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Investir</h1>
         
-        <div className="space-y-6">
-          <div>
-            <Label htmlFor="pack">Pack d'investissement</Label>
-            <Select onValueChange={handlePackSelect}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un pack" />
-              </SelectTrigger>
-              <SelectContent>
-                {packs.map((pack) => (
-                  <SelectItem key={pack.id} value={pack.id}>
-                    {pack.name} - Min: {pack.min_amount}€ ({pack.return_rate}% de rendement)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedPack && (
-            <>
-              <div>
-                <Label htmlFor="amount">Montant à investir (€)</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  min={selectedPack.min_amount}
-                  max={getRemainingAmount()}
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Montant minimum : {selectedPack.min_amount}€
-                  <br />
-                  Montant restant à collecter : {getRemainingAmount()}€
-                </p>
-              </div>
-
-              {isValidAmount() && (
-                <div className="space-y-4">
-                  <PayPalScriptProvider options={{ 
-                    clientId: "test",
-                    currency: "EUR",
-                    intent: "CAPTURE"
-                  }}>
-                    <PayPalButtons
-                      disabled={isProcessing}
-                      style={{ layout: "vertical" }}
-                      createOrder={(data, actions) => {
-                        return actions.order.create({
-                          intent: "CAPTURE",
-                          purchase_units: [
-                            {
-                              amount: {
-                                value: amount.toString(),
-                                currency_code: "EUR"
-                              },
-                              description: `Investissement - ${selectedPack.name}`
-                            }
-                          ]
-                        });
-                      }}
-                      onApprove={async (data, actions) => {
-                        setIsProcessing(true);
-                        try {
-                          const details = await actions.order?.capture();
-                          await createInvestment(details);
-                        } catch (error) {
-                          console.error('Payment failed:', error);
-                          toast.error("Le paiement a échoué. Veuillez réessayer.");
-                        } finally {
-                          setIsProcessing(false);
-                        }
-                      }}
-                      onError={() => {
-                        toast.error("Une erreur est survenue lors du paiement. Veuillez réessayer.");
-                        setIsProcessing(false);
-                      }}
-                    />
-                  </PayPalScriptProvider>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        <PayPalScriptProvider options={{ 
+          clientId: "test",
+          currency: "EUR",
+          intent: "CAPTURE"
+        }}>
+          <PaymentForm
+            packs={packs}
+            onPackSelect={handlePackSelect}
+            selectedPack={selectedPack}
+            amount={amount}
+            setAmount={setAmount}
+            isProcessing={isProcessing}
+            getRemainingAmount={getRemainingAmount}
+            createInvestment={createInvestment}
+          />
+        </PayPalScriptProvider>
       </Card>
     </div>
   );
