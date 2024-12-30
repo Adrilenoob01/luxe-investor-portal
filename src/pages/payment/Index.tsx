@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { OrderProject } from "@/types/supabase";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { PaymentForm } from "@/components/payment/PaymentForm";
+import { Loader2 } from "lucide-react";
 
 export default function Payment() {
   const navigate = useNavigate();
@@ -14,12 +15,22 @@ export default function Payment() {
   const [amount, setAmount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paypalClientId, setPaypalClientId] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchPacks();
     checkAuth();
     fetchPaypalClientId();
+    fetchPacks();
   }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("Vous devez être connecté pour investir");
+      navigate('/login');
+    }
+    setIsLoading(false);
+  };
 
   const fetchPaypalClientId = async () => {
     try {
@@ -34,13 +45,6 @@ export default function Payment() {
     } catch (error) {
       console.error('Error fetching PayPal client ID:', error);
       toast.error("Erreur lors du chargement de la configuration PayPal");
-    }
-  };
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/login');
     }
   };
 
@@ -105,40 +109,38 @@ export default function Payment() {
     return selectedPack.target_amount - selectedPack.collected_amount;
   };
 
-  if (!paypalClientId) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <Card className="max-w-md mx-auto p-6">
-          <p className="text-center text-gray-500">
-            Chargement de la configuration PayPal...
-          </p>
-        </Card>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
-      <Card className="max-w-md mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-6">Investir</h1>
-        
-        <PayPalScriptProvider options={{ 
-          clientId: paypalClientId,
-          currency: "EUR",
-          intent: "CAPTURE"
-        }}>
-          <PaymentForm
-            packs={packs}
-            onPackSelect={handlePackSelect}
-            selectedPack={selectedPack}
-            amount={amount}
-            setAmount={setAmount}
-            isProcessing={isProcessing}
-            getRemainingAmount={getRemainingAmount}
-            createInvestment={createInvestment}
-          />
-        </PayPalScriptProvider>
-      </Card>
+      <div className="max-w-4xl mx-auto px-4">
+        <Card className="p-6">
+          <h1 className="text-2xl font-bold mb-6">Investir dans un projet</h1>
+          
+          <PayPalScriptProvider options={{ 
+            clientId: paypalClientId,
+            currency: "EUR",
+            intent: "CAPTURE"
+          }}>
+            <PaymentForm
+              packs={packs}
+              onPackSelect={handlePackSelect}
+              selectedPack={selectedPack}
+              amount={amount}
+              setAmount={setAmount}
+              isProcessing={isProcessing}
+              getRemainingAmount={getRemainingAmount}
+              createInvestment={createInvestment}
+            />
+          </PayPalScriptProvider>
+        </Card>
+      </div>
     </div>
   );
 }
