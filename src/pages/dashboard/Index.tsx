@@ -51,7 +51,7 @@ const Dashboard = () => {
     },
   });
 
-  const { data: investments, isLoading: investmentsLoading } = useQuery<Investment[]>({
+  const { data: investments = [], isLoading: investmentsLoading } = useQuery<Investment[]>({
     queryKey: ["investments"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -78,17 +78,18 @@ const Dashboard = () => {
             short_description,
             detailed_description,
             location,
-            category
+            category,
+            min_amount
           )
         `)
         .eq("user_id", session.user.id);
 
       if (error) throw error;
-      return data;
+      return data as Investment[];
     },
   });
 
-  const { data: withdrawals, isLoading: withdrawalsLoading, refetch: refetchWithdrawals } = useQuery<Withdrawal[]>({
+  const { data: withdrawals = [], isLoading: withdrawalsLoading, refetch: refetchWithdrawals } = useQuery<Withdrawal[]>({
     queryKey: ["withdrawals"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -100,13 +101,13 @@ const Dashboard = () => {
         .eq("user_id", session.user.id);
 
       if (error) throw error;
-      return data;
+      return data as Withdrawal[];
     },
   });
 
   // Calculate portfolio metrics
-  const totalInvested = investments?.reduce((sum, inv) => sum + Number(inv.amount), 0) || 0;
-  const estimatedReturns = investments?.reduce((sum, inv) => {
+  const totalInvested = investments.reduce((sum, inv) => sum + Number(inv.amount), 0) || 0;
+  const estimatedReturns = investments.reduce((sum, inv) => {
     const returnRate = inv.order_projects?.return_rate || 0;
     return sum + (Number(inv.amount) * (returnRate / 100));
   }, 0) || 0;
@@ -195,7 +196,7 @@ const Dashboard = () => {
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Investissements actifs</h3>
             <div className="space-y-4">
-              {investments?.map((investment) => (
+              {investments.map((investment) => (
                 <div
                   key={investment.id}
                   className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
@@ -209,7 +210,7 @@ const Dashboard = () => {
                   <p className="font-semibold">{Number(investment.amount).toLocaleString()}€</p>
                 </div>
               ))}
-              {(!investments || investments.length === 0) && (
+              {investments.length === 0 && (
                 <p className="text-center text-gray-500">Aucun investissement actif</p>
               )}
             </div>
@@ -217,8 +218,8 @@ const Dashboard = () => {
         </div>
 
         <TransactionHistory 
-          investments={investments || []} 
-          withdrawals={withdrawals || []} 
+          investments={investments} 
+          withdrawals={withdrawals} 
         />
 
         <div className="mt-8 flex justify-end">
