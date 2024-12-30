@@ -32,13 +32,6 @@ export const PaymentForm = ({
   getRemainingAmount,
   createInvestment,
 }: PaymentFormProps) => {
-  const isValidAmount = () => {
-    if (!selectedPack) return false;
-    const remainingAmount = getRemainingAmount();
-    const numericAmount = Number(amount);
-    return numericAmount >= selectedPack.min_amount && numericAmount <= remainingAmount;
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -76,34 +69,32 @@ export const PaymentForm = ({
             </p>
           </div>
 
-          {isValidAmount() && (
-            <div className="space-y-4">
-              <PayPalButtons
-                disabled={isProcessing}
-                style={{ layout: "vertical" }}
-                createOrder={(data, actions) => {
-                  return actions.order.create({
-                    intent: "CAPTURE",
-                    purchase_units: [
-                      {
-                        amount: {
-                          value: amount.toString(),
-                          currency_code: "EUR"
-                        },
-                        description: `Investissement - ${selectedPack.name}`
-                      }
-                    ]
-                  });
-                }}
-                onApprove={async (data, actions) => {
-                  if (actions.order) {
-                    const details = await actions.order.capture();
-                    await createInvestment(details);
-                  }
-                }}
-              />
-            </div>
-          )}
+          <div className="space-y-4">
+            <PayPalButtons
+              disabled={isProcessing}
+              style={{ layout: "vertical" }}
+              createOrder={(data, actions) => {
+                return actions.order.create({
+                  intent: "CAPTURE",
+                  purchase_units: [
+                    {
+                      amount: {
+                        value: amount.toString(),
+                        currency_code: "EUR"
+                      },
+                      description: `Investissement - ${selectedPack.name}`
+                    }
+                  ]
+                });
+              }}
+              onApprove={async (data, actions) => {
+                if (actions.order) {
+                  const details = await actions.order.capture();
+                  await createInvestment(details);
+                }
+              }}
+            />
+          </div>
         </>
       )}
     </div>
