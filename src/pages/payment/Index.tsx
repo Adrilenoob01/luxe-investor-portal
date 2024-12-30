@@ -55,7 +55,7 @@ export default function Payment() {
     const pack = packs.find(p => p.id === packId);
     setSelectedPack(pack || null);
     if (pack) {
-      setAmount(pack.min_amount); // Utilise le montant minimal défini pour ce pack
+      setAmount(pack.min_amount);
     }
   };
 
@@ -96,7 +96,15 @@ export default function Payment() {
   const isValidAmount = () => {
     if (!selectedPack) return false;
     const remainingAmount = getRemainingAmount();
-    return amount >= selectedPack.min_amount && amount <= remainingAmount;
+    // Conversion explicite en nombre pour la comparaison
+    const numericAmount = Number(amount);
+    console.log('Validation amount:', {
+      amount: numericAmount,
+      minAmount: selectedPack.min_amount,
+      remainingAmount,
+      isValid: numericAmount >= selectedPack.min_amount && numericAmount <= remainingAmount
+    });
+    return numericAmount >= selectedPack.min_amount && numericAmount <= remainingAmount;
   };
 
   return (
@@ -131,7 +139,7 @@ export default function Payment() {
                   min={selectedPack.min_amount}
                   max={getRemainingAmount()}
                   value={amount}
-                  onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setAmount(Number(e.target.value))}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
                   Montant minimum : {selectedPack.min_amount}€
