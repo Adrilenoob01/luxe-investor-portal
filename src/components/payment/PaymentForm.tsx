@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/select";
 import { OrderProject } from "@/types/supabase";
 import { PayPalButtons } from "@paypal/react-paypal-js";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface PaymentFormProps {
   packs: OrderProject[];
@@ -32,6 +34,8 @@ export const PaymentForm = ({
   getRemainingAmount,
   createInvestment,
 }: PaymentFormProps) => {
+  const [paypalError, setPaypalError] = useState<string | null>(null);
+
   return (
     <div className="space-y-6">
       <div>
@@ -70,6 +74,15 @@ export const PaymentForm = ({
           </div>
 
           <div className="space-y-4">
+            {paypalError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Erreur lors du chargement de PayPal : {paypalError}
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <PayPalButtons
               disabled={isProcessing}
               style={{ layout: "vertical" }}
@@ -92,6 +105,10 @@ export const PaymentForm = ({
                   const details = await actions.order.capture();
                   await createInvestment(details);
                 }
+              }}
+              onError={(err) => {
+                console.error("PayPal Error:", err);
+                setPaypalError("Une erreur est survenue avec PayPal. Veuillez réessayer plus tard.");
               }}
             />
           </div>
