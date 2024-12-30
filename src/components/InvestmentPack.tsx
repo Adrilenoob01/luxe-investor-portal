@@ -132,7 +132,7 @@ export const InvestmentPack = ({
           )}
           <div className="text-sm">
             <p className="text-gray-600">Investissement minimum</p>
-            <p className="font-semibold">5€</p>
+            <p className="font-semibold">{minAmount}€</p>
           </div>
           <Button 
             className="w-full" 

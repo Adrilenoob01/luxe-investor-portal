@@ -73,6 +73,7 @@ export type Database = {
           implementation_date: string | null
           is_active: boolean | null
           location: string | null
+          min_amount: number
           name: string
           return_rate: number
           short_description: string | null
@@ -92,6 +93,7 @@ export type Database = {
           implementation_date?: string | null
           is_active?: boolean | null
           location?: string | null
+          min_amount?: number
           name: string
           return_rate: number
           short_description?: string | null
@@ -111,6 +113,7 @@ export type Database = {
           implementation_date?: string | null
           is_active?: boolean | null
           location?: string | null
+          min_amount?: number
           name?: string
           return_rate?: number
           short_description?: string | null

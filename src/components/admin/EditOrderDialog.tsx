@@ -42,6 +42,14 @@ export const EditOrderDialog = ({ pack, onUpdate }: EditOrderDialogProps) => {
               />
             </div>
             <div>
+              <Label>Montant minimum d'investissement</Label>
+              <Input
+                type="number"
+                value={editingPack.min_amount}
+                onChange={(e) => setEditingPack({ ...editingPack, min_amount: parseFloat(e.target.value) })}
+              />
+            </div>
+            <div>
               <Label>Montant cible</Label>
               <Input
                 type="number"

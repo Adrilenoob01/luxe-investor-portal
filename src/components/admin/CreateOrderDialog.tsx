@@ -14,7 +14,7 @@ interface CreateOrderDialogProps {
 export const CreateOrderDialog = ({ onOrderCreated }: CreateOrderDialogProps) => {
   const [newPack, setNewPack] = useState({ 
     name: '', 
-    minAmount: 0,
+    minAmount: 5,
     targetAmount: 0,
     returnRate: 0,
     implementationDate: '',
@@ -33,6 +33,7 @@ export const CreateOrderDialog = ({ onOrderCreated }: CreateOrderDialogProps) =>
           description: newPack.description,
           implementation_date: newPack.implementationDate,
           end_date: newPack.endDate,
+          min_amount: newPack.minAmount,
         });
 
       if (error) throw error;
@@ -40,7 +41,7 @@ export const CreateOrderDialog = ({ onOrderCreated }: CreateOrderDialogProps) =>
       toast.success("Pack d'investissement créé avec succès");
       setNewPack({ 
         name: '', 
-        minAmount: 0,
+        minAmount: 5,
         targetAmount: 0,
         returnRate: 0,
         implementationDate: '',
@@ -73,7 +74,7 @@ export const CreateOrderDialog = ({ onOrderCreated }: CreateOrderDialogProps) =>
             />
           </div>
           <div>
-            <Label htmlFor="minAmount">Montant minimum</Label>
+            <Label htmlFor="minAmount">Montant minimum d'investissement</Label>
             <Input
               id="minAmount"
               type="number"
