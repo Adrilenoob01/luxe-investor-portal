@@ -20,6 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Investment, Profile, Withdrawal } from "@/types/supabase";
 import { WithdrawalRequestDialog } from "@/components/dashboard/WithdrawalRequestDialog";
 import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
+import { ActiveInvestments } from "@/components/dashboard/ActiveInvestments";
+import { PortfolioStats } from "@/components/dashboard/PortfolioStats";
+import { PortfolioChart } from "@/components/dashboard/PortfolioChart";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -105,14 +108,13 @@ const Dashboard = () => {
     },
   });
 
-  // Calculate portfolio metrics
+  // Calculate portfolio metrics for the chart
   const totalInvested = investments.reduce((sum, inv) => sum + Number(inv.amount), 0) || 0;
   const estimatedReturns = investments.reduce((sum, inv) => {
     const returnRate = inv.order_projects?.return_rate || 0;
     return sum + (Number(inv.amount) * (returnRate / 100));
   }, 0) || 0;
 
-  // Mock data for the portfolio evolution graph
   const portfolioData = [
     { month: "Jan", value: totalInvested },
     { month: "Feb", value: totalInvested * 1.02 },
@@ -149,72 +151,15 @@ const Dashboard = () => {
           </Dialog>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Solde disponible</h3>
-            <p className="text-2xl font-bold text-primary">
-              {profile?.available_balance?.toLocaleString()}€
-            </p>
-          </Card>
-          
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Montant investi</h3>
-            <p className="text-2xl font-bold text-success-DEFAULT">
-              {profile?.invested_amount?.toLocaleString()}€
-            </p>
-          </Card>
-          
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Rendements estimés</h3>
-            <p className="text-2xl font-bold text-secondary">
-              {estimatedReturns.toLocaleString()}€
-            </p>
-          </Card>
-        </div>
+        <PortfolioStats 
+          availableBalance={profile?.available_balance || 0}
+          investedAmount={profile?.invested_amount || 0}
+          estimatedReturns={estimatedReturns}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Évolution du portefeuille</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={portfolioData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#0EA5E9"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Investissements actifs</h3>
-            <div className="space-y-4">
-              {investments.map((investment) => (
-                <div
-                  key={investment.id}
-                  className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
-                >
-                  <div>
-                    <p className="font-semibold">{investment.order_projects?.name}</p>
-                    <p className="text-sm text-gray-600">
-                      Taux de rendement : {investment.order_projects?.return_rate}%
-                    </p>
-                  </div>
-                  <p className="font-semibold">{Number(investment.amount).toLocaleString()}€</p>
-                </div>
-              ))}
-              {investments.length === 0 && (
-                <p className="text-center text-gray-500">Aucun investissement actif</p>
-              )}
-            </div>
-          </Card>
+          <PortfolioChart data={portfolioData} />
+          <ActiveInvestments investments={investments} />
         </div>
 
         <TransactionHistory 
