@@ -22,7 +22,7 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold gradient-text">LuxInvest</h1>
+          <h1 className="text-2xl font-bold gradient-text">WearShop Invest</h1>
           <p className="text-muted-foreground">Connectez-vous à votre compte</p>
         </div>
 
