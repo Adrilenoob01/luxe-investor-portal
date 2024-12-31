@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { OrderProject } from "@/types/supabase";
 import { PaymentForm } from "@/components/payment/PaymentForm";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Payment() {
   const navigate = useNavigate();
@@ -25,10 +26,15 @@ export default function Payment() {
       toast.success(
         "Merci de votre confiance ! Votre investissement va être traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact.wearshop@gmail.com en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement.",
         {
-          duration: 10000, // Afficher pendant 10 secondes
+          duration: Infinity,
+          action: {
+            label: "D'accord !",
+            onClick: () => {
+              navigate('/dashboard');
+            },
+          },
         }
       );
-      navigate('/dashboard');
     } else if (searchParams.get('cancelled') === 'true') {
       toast.error("Paiement annulé");
     }
