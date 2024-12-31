@@ -61,6 +61,27 @@ export default function Register() {
           theme="light"
           providers={[]}
           redirectTo={`${window.location.origin}/dashboard`}
+          options={{
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+            metaData: {
+              first_name: '',
+              last_name: '',
+            },
+          }}
+          extendedSignUpFields={[
+            {
+              id: "first_name",
+              label: "Prénom",
+              type: "text",
+              required: true,
+            },
+            {
+              id: "last_name",
+              label: "Nom",
+              type: "text",
+              required: true,
+            },
+          ]}
         />
 
         <div className="text-center text-sm text-muted-foreground">
