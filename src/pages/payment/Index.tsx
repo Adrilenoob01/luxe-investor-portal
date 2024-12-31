@@ -20,8 +20,16 @@ export default function Payment() {
     checkAuth();
     fetchPacks();
     
-    // Check for cancelled payment
-    if (searchParams.get('cancelled') === 'true') {
+    // Check for success or cancelled payment
+    if (searchParams.get('success') === 'true') {
+      toast.success(
+        "Merci de votre confiance ! Votre investissement va être traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact.wearshop@gmail.com en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement.",
+        {
+          duration: 10000, // Afficher pendant 10 secondes
+        }
+      );
+      navigate('/dashboard');
+    } else if (searchParams.get('cancelled') === 'true') {
       toast.error("Paiement annulé");
     }
   }, []);
