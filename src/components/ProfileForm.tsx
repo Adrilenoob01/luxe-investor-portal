@@ -7,7 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
-export const ProfileForm = () => {
+interface ProfileFormProps {
+  onComplete?: () => void;
+}
+
+export const ProfileForm = ({ onComplete }: ProfileFormProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
@@ -73,6 +77,7 @@ export const ProfileForm = () => {
 
       if (error) throw error;
       toast.success("Profil mis à jour avec succès");
+      onComplete?.();
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error("Erreur lors de la mise à jour du profil");
@@ -85,7 +90,6 @@ export const ProfileForm = () => {
 
   return (
     <Card className="p-6 max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Mon Profil</h2>
       <div className="space-y-4">
         <div>
           <Label htmlFor="firstName">Prénom</Label>

@@ -2,19 +2,14 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Header } from "@/components/Header";
 import { Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ProfileForm } from "@/components/ProfileForm";
 import { Button } from "@/components/ui/button";
 import { Investment, Profile, Withdrawal } from "@/types/supabase";
@@ -23,9 +18,11 @@ import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
 import { ActiveInvestments } from "@/components/dashboard/ActiveInvestments";
 import { PortfolioStats } from "@/components/dashboard/PortfolioStats";
 import { PortfolioChart } from "@/components/dashboard/PortfolioChart";
+import { useState } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -50,6 +47,12 @@ const Dashboard = () => {
         .single();
 
       if (error) throw error;
+      
+      // Check if profile is incomplete
+      if (!data.first_name || !data.last_name) {
+        setShowProfileDialog(true);
+      }
+      
       return data as Profile;
     },
   });
@@ -124,7 +127,7 @@ const Dashboard = () => {
     { month: "Jun", value: totalInvested * 1.10 },
   ];
 
-  if (profileLoading || investmentsLoading || withdrawalsLoading) {
+  if (profileLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -135,6 +138,18 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Complétez votre profil</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-muted-foreground mb-4">
+            Pour continuer, veuillez renseigner votre nom et prénom.
+          </div>
+          <ProfileForm onComplete={() => setShowProfileDialog(false)} />
+        </DialogContent>
+      </Dialog>
+
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Dashboard</h1>
