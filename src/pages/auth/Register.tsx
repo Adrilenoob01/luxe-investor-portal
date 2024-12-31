@@ -57,11 +57,9 @@ const Register = () => {
           theme="light"
           providers={[]}
           redirectTo={`${window.location.origin}/dashboard`}
-          options={{
-            data: {
-              first_name: "",
-              last_name: "",
-            },
+          data={{
+            first_name: "",
+            last_name: "",
           }}
         />
 
