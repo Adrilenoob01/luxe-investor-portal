@@ -10,10 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OrderProject } from "@/types/supabase";
-import { PayPalButtons } from "@paypal/react-paypal-js";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PaymentFormProps {
   packs: OrderProject[];
@@ -23,7 +24,6 @@ interface PaymentFormProps {
   setAmount: (amount: number) => void;
   isProcessing: boolean;
   getRemainingAmount: () => number;
-  createInvestment: (details: any) => Promise<void>;
 }
 
 export const PaymentForm = ({
@@ -34,10 +34,8 @@ export const PaymentForm = ({
   setAmount,
   isProcessing,
   getRemainingAmount,
-  createInvestment,
 }: PaymentFormProps) => {
-  const [paypalError, setPaypalError] = useState<string | null>(null);
-  const [showPaypalDialog, setShowPaypalDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const isAmountValid = () => {
     if (!selectedPack) return false;
@@ -46,9 +44,39 @@ export const PaymentForm = ({
   };
 
   const handleProceedClick = () => {
-    console.log("Opening PayPal dialog");
+    console.log("Opening confirmation dialog");
     if (isAmountValid()) {
-      setShowPaypalDialog(true);
+      setShowConfirmDialog(true);
+    }
+  };
+
+  const handleConfirmInvestment = async () => {
+    try {
+      if (!selectedPack || !isAmountValid()) return;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Vous devez être connecté pour investir");
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-stripe-session', {
+        body: {
+          amount: amount,
+          projectId: selectedPack.id,
+          projectName: selectedPack.name,
+        }
+      });
+
+      if (error) throw error;
+      if (!data.url) throw new Error("No checkout URL received");
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Error creating Stripe session:', error);
+      toast.error("Erreur lors de la création de la session de paiement");
+    } finally {
+      setShowConfirmDialog(false);
     }
   };
 
@@ -106,7 +134,7 @@ export const PaymentForm = ({
             Procéder à l'investissement
           </Button>
 
-          <Dialog open={showPaypalDialog} onOpenChange={setShowPaypalDialog}>
+          <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Confirmer votre investissement</DialogTitle>
@@ -119,47 +147,13 @@ export const PaymentForm = ({
                   </p>
                 </div>
 
-                {paypalError && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{paypalError}</AlertDescription>
-                  </Alert>
-                )}
-
-                <PayPalButtons
-                  style={{ layout: "vertical" }}
+                <Button 
+                  onClick={handleConfirmInvestment}
                   disabled={isProcessing}
-                  createOrder={(data, actions) => {
-                    console.log("Creating PayPal order");
-                    if (!isAmountValid()) {
-                      return Promise.reject(new Error("Montant invalide"));
-                    }
-                    return actions.order.create({
-                      intent: "CAPTURE",
-                      purchase_units: [
-                        {
-                          amount: {
-                            value: amount.toString(),
-                            currency_code: "EUR"
-                          },
-                          description: `Investissement - ${selectedPack.name}`
-                        }
-                      ]
-                    });
-                  }}
-                  onApprove={async (data, actions) => {
-                    console.log("PayPal order approved");
-                    if (actions.order) {
-                      const details = await actions.order.capture();
-                      await createInvestment(details);
-                      setShowPaypalDialog(false);
-                    }
-                  }}
-                  onError={(err) => {
-                    console.error("PayPal Error:", err);
-                    setPaypalError("Une erreur est survenue avec PayPal. Veuillez réessayer plus tard.");
-                  }}
-                />
+                  className="w-full"
+                >
+                  Confirmer et payer
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
