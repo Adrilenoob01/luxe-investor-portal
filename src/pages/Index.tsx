@@ -52,6 +52,7 @@ const Index = () => {
                 key={project.id}
                 title={project.name}
                 minAmount={project.min_amount}
+                targetAmount={project.target_amount}
                 returnRate={project.return_rate}
                 description={project.description}
                 progress={(project.collected_amount / project.target_amount) * 100}

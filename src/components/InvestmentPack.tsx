@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 interface InvestmentPackProps {
   title: string;
   minAmount: number;
+  targetAmount: number;
   returnRate: number;
   description: string;
   progress: number;
@@ -22,6 +23,7 @@ interface InvestmentPackProps {
 export const InvestmentPack = ({
   title,
   minAmount,
+  targetAmount,
   returnRate,
   description,
   progress,
@@ -101,7 +103,7 @@ export const InvestmentPack = ({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-gray-600">Objectif</p>
-              <p className="font-semibold">{minAmount.toLocaleString()}€</p>
+              <p className="font-semibold">{targetAmount.toLocaleString()}€</p>
             </div>
             <div>
               <p className="text-gray-600">Rendement</p>
