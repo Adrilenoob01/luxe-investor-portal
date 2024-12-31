@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
-export const Register = () => {
+const Register = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,24 +57,12 @@ export const Register = () => {
           theme="light"
           providers={[]}
           redirectTo={`${window.location.origin}/dashboard`}
-          additionalData={{
-            first_name: "",
-            last_name: "",
+          options={{
+            data: {
+              first_name: "",
+              last_name: "",
+            },
           }}
-          extendedFields={[
-            {
-              name: "first_name",
-              label: "Prénom",
-              type: "text",
-              required: true,
-            },
-            {
-              name: "last_name",
-              label: "Nom",
-              type: "text",
-              required: true,
-            },
-          ]}
         />
 
         <div className="text-center text-sm text-muted-foreground">
@@ -94,3 +82,5 @@ export const Register = () => {
     </div>
   );
 };
+
+export default Register;
