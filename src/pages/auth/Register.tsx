@@ -24,7 +24,7 @@ export const Register = () => {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-center">Créer un compte</h1>
           <p className="text-center text-muted-foreground">
-            Commencez à investir dans le luxe dès aujourd'hui
+            Commencez à investir dans le luxe dès aujourd&apos;hui
           </p>
         </div>
 
@@ -36,8 +36,8 @@ export const Register = () => {
             variables: {
               default: {
                 colors: {
-                  brand: '#000000',
-                  brandAccent: '#666666',
+                  brand: "#000000",
+                  brandAccent: "#666666",
                 },
               },
             },
@@ -45,12 +45,12 @@ export const Register = () => {
           localization={{
             variables: {
               sign_up: {
-                email_label: 'Adresse email',
-                password_label: 'Mot de passe',
-                button_label: 'Créer un compte',
-                loading_button_label: 'Création en cours...',
-                social_provider_text: 'Se connecter avec {{provider}}',
-                link_text: 'Vous n'avez pas de compte ? Inscrivez-vous',
+                email_label: "Adresse email",
+                password_label: "Mot de passe",
+                button_label: "Créer un compte",
+                loading_button_label: "Création en cours...",
+                social_provider_text: "Se connecter avec {{provider}}",
+                link_text: "Vous n&apos;avez pas de compte ? Inscrivez-vous",
               },
             },
           }}
@@ -58,20 +58,20 @@ export const Register = () => {
           providers={[]}
           redirectTo={`${window.location.origin}/dashboard`}
           additionalData={{
-            first_name: '',
-            last_name: '',
+            first_name: "",
+            last_name: "",
           }}
           extendedFields={[
             {
-              name: 'first_name',
-              label: 'Prénom',
-              type: 'text',
+              name: "first_name",
+              label: "Prénom",
+              type: "text",
               required: true,
             },
             {
-              name: 'last_name',
-              label: 'Nom',
-              type: 'text',
+              name: "last_name",
+              label: "Nom",
+              type: "text",
               required: true,
             },
           ]}
@@ -81,7 +81,7 @@ export const Register = () => {
           <p className="mt-4">
             En créant un compte, vous acceptez nos{" "}
             <a href="#" className="underline">
-              conditions d'utilisation
+              conditions d&apos;utilisation
             </a>{" "}
             et notre{" "}
             <a href="#" className="underline">
