@@ -57,10 +57,6 @@ const Register = () => {
           theme="light"
           providers={[]}
           redirectTo={`${window.location.origin}/dashboard`}
-          data={{
-            first_name: "",
-            last_name: "",
-          }}
         />
 
         <div className="text-center text-sm text-muted-foreground">
