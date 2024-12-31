@@ -50,6 +50,15 @@ export const PaymentForm = ({
     }
   };
 
+  const handleCashPayment = () => {
+    toast.info(
+      "Pour tout investissement en espèce sur une de nos commandes, merci de contacter nos équipes à contact.wearshop@gmail.com et nous serons ravis de procéder à votre investissement !",
+      {
+        duration: 10000,
+      }
+    );
+  };
+
   const handleConfirmInvestment = async () => {
     try {
       if (!selectedPack || !isAmountValid()) return;
@@ -126,13 +135,22 @@ export const PaymentForm = ({
             </Alert>
           )}
 
-          <Button 
-            onClick={handleProceedClick}
-            disabled={!isAmountValid() || isProcessing}
-            className="w-full"
-          >
-            Procéder à l'investissement
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              onClick={handleProceedClick}
+              disabled={!isAmountValid() || isProcessing}
+              className="flex-1"
+            >
+              Procéder à l'investissement
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleCashPayment}
+              className="flex-1"
+            >
+              Je paye en espèces
+            </Button>
+          </div>
 
           <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
             <DialogContent>
@@ -146,6 +164,12 @@ export const PaymentForm = ({
                     Projet : {selectedPack.name}
                   </p>
                 </div>
+
+                <Alert className="bg-muted">
+                  <AlertDescription className="text-sm">
+                    Une fois que votre paiement sera accepté, votre investissement sera traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact.wearshop@gmail.com en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement.
+                  </AlertDescription>
+                </Alert>
 
                 <Button 
                   onClick={handleConfirmInvestment}
