@@ -34,7 +34,7 @@ const OrdersPage = () => {
               <InvestmentPack
                 key={project.id}
                 title={project.name}
-                minAmount={project.target_amount}
+                minAmount={project.min_amount}
                 returnRate={project.return_rate}
                 description={project.description}
                 progress={(project.collected_amount / project.target_amount) * 100}
