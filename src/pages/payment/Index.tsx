@@ -24,7 +24,7 @@ export default function Payment() {
     // Check for success or cancelled payment
     if (searchParams.get('success') === 'true') {
       toast.success(
-        "Merci de votre confiance ! Votre investissement va être traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact.wearshop@gmail.com en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement.",
+        "Merci de votre confiance ! Votre investissement va être traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact@wearshops.fr en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement.",
         {
           duration: Infinity,
           action: {
@@ -44,7 +44,8 @@ export default function Payment() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       toast.error("Vous devez être connecté pour investir");
-      navigate('/login');
+      navigate('/login', { replace: true });
+      return;
     }
     setIsLoading(false);
   };
