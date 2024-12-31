@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { Header } from "@/components/Header";
 import { Loader2 } from "lucide-react";
