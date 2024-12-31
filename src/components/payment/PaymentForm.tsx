@@ -52,7 +52,7 @@ export const PaymentForm = ({
 
   const handleCashPayment = () => {
     toast.info(
-      "Pour tout investissement en espèce sur une de nos commandes, merci de contacter nos équipes à contact.wearshop@gmail.com et nous serons ravis de procéder à votre investissement !",
+      "Pour tout investissement en espèce sur une de nos commandes, merci de contacter nos équipes à contact@wearshops.fr et nous serons ravis de procéder à votre investissement !",
       {
         duration: 10000,
       }
@@ -167,7 +167,7 @@ export const PaymentForm = ({
 
                 <Alert className="bg-muted">
                   <AlertDescription className="text-sm">
-                    Une fois que votre paiement sera accepté, votre investissement sera traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact.wearshop@gmail.com en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement.
+                    Une fois que votre paiement sera accepté, votre investissement sera traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact@wearshops.fr en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement.
                   </AlertDescription>
                 </Alert>
 

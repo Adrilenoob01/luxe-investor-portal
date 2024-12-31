@@ -114,7 +114,7 @@ const Index = () => {
             <div>
               <h4 className="font-semibold text-lg mb-4">Contact</h4>
               <p className="text-gray-600">
-                Email: contact.wearshop@gmail.com
+                Email: contact@wearshops.fr
               </p>
             </div>
             <div>
