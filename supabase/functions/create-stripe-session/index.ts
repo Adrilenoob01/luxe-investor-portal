@@ -33,6 +33,10 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
+    // Get the base URL from the request origin
+    const baseUrl = req.headers.get('origin') || '';
+    console.log('Base URL:', baseUrl);
+
     console.log('Creating payment session...');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -49,8 +53,8 @@ serve(async (req) => {
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/dashboard?success=true`,
-      cancel_url: `${req.headers.get('origin')}/payment?cancelled=true`,
+      success_url: `${baseUrl}/payment?success=true`,
+      cancel_url: `${baseUrl}/payment?cancelled=true`,
       metadata: {
         user_id: user.id,
         project_id: projectId,
