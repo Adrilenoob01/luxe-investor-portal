@@ -124,6 +124,15 @@ const Index = () => {
               </p>
             </div>
           </div>
+          
+          <div className="mt-8 pt-8 border-t border-gray-200">
+            <div className="text-center max-w-3xl mx-auto">
+              <p className="text-amber-700 font-medium mb-2">⚠️ Avertissement sur les risques</p>
+              <p className="text-gray-600 text-sm">
+                Tout investissement comporte des risques de perte en capital. Il est important de ne jamais investir plus que ce que vous êtes prêt à perdre. Nous vous recommandons d'évaluer soigneusement votre situation financière et vos objectifs avant de prendre toute décision d'investissement.
+              </p>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
