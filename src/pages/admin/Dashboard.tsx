@@ -9,7 +9,9 @@ import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
 import { CreateOrderDialog } from "@/components/admin/CreateOrderDialog";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { TabNavigation } from "@/components/admin/TabNavigation";
-import { Profile, OrderProject, Investment, Withdrawal } from "@/types/supabase";
+import { Profile } from "@/types/profile";
+import { OrderProject } from "@/types/order-project";
+import { Investment, Withdrawal } from "@/types/transaction";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();

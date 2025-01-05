@@ -1,6 +1,13 @@
 import { Profile } from './profile';
 import { OrderProject } from './order-project';
 
+// Type pour les données minimales du profil retournées dans les relations
+export interface ProfileMinimal {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
 interface BaseTransaction {
   id: string;
   user_id: string | null;
@@ -9,7 +16,7 @@ interface BaseTransaction {
   created_at: string;
   updated_at: string;
   is_cancelled: boolean | null;
-  profiles?: Profile;
+  profiles?: ProfileMinimal;
 }
 
 export interface Investment extends BaseTransaction {
@@ -20,4 +27,7 @@ export interface Investment extends BaseTransaction {
 
 export interface Withdrawal extends BaseTransaction {
   withdrawal_method: string | null;
+  fees: number | null;
+  iban: string | null;
+  phone_number: string | null;
 }
