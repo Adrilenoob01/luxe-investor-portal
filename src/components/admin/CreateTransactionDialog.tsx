@@ -35,12 +35,6 @@ export const CreateTransactionDialog = ({ user, packs, onTransactionCreated }: C
           return;
         }
 
-        const selectedPackData = packs.find(p => p.id === selectedPack);
-        if (!selectedPackData || amount < selectedPackData.target_amount) {
-          toast.error(`Le montant minimum pour cette commande est de ${selectedPackData?.target_amount}€`);
-          return;
-        }
-
         if (!paymentMethod) {
           toast.error("Veuillez sélectionner une méthode de paiement");
           return;
@@ -131,7 +125,7 @@ export const CreateTransactionDialog = ({ user, packs, onTransactionCreated }: C
                 <SelectContent>
                   {packs.map((pack) => (
                     <SelectItem key={pack.id} value={pack.id}>
-                      {pack.name} - Min: {pack.target_amount}€
+                      {pack.name} - Min: {pack.min_amount}€
                     </SelectItem>
                   ))}
                 </SelectContent>
