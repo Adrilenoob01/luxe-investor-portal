@@ -27,6 +27,14 @@ export const EmailSection = () => {
     }
   });
 
+  const formatContentToHtml = (text: string) => {
+    // Convertir les sauts de ligne en balises <br>
+    let html = text.replace(/\n/g, '<br>');
+    // Convertir le texte entre ** en gras
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    return html;
+  };
+
   const handleSendEmail = async () => {
     if (!recipient || !subject || !content) {
       toast({
@@ -39,11 +47,13 @@ export const EmailSection = () => {
 
     setIsSending(true);
     try {
+      const formattedContent = formatContentToHtml(content);
+      
       const { data, error } = await supabase.functions.invoke('send-admin-email', {
         body: {
           to: recipient,
           subject,
-          content,
+          content: formattedContent,
         },
       });
 
@@ -108,11 +118,14 @@ export const EmailSection = () => {
           <label className="block text-sm font-medium mb-1">
             Contenu
           </label>
+          <div className="text-sm text-gray-500 mb-2">
+            Pour mettre du texte en gras, entourez-le avec des doubles astérisques : **texte en gras**
+          </div>
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Contenu de l'email"
-            className="min-h-[200px]"
+            className="min-h-[200px] font-mono whitespace-pre-wrap"
           />
         </div>
         <Button 
