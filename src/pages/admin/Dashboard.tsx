@@ -9,13 +9,14 @@ import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
 import { CreateOrderDialog } from "@/components/admin/CreateOrderDialog";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { TabNavigation } from "@/components/admin/TabNavigation";
+import { EmailSection } from "@/components/admin/EmailSection";
 import { Profile } from "@/types/profile";
 import { OrderProject } from "@/types/order-project";
 import { Investment, Withdrawal } from "@/types/transaction";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'users' | 'packs' | 'transactions'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'packs' | 'transactions' | 'email'>('users');
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
@@ -100,7 +101,16 @@ const AdminDashboard = () => {
         navigate("/admin/login");
       }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavigation 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab as (tab: string) => void}
+          tabs={[
+            { id: 'users', label: 'Utilisateurs' },
+            { id: 'packs', label: 'Packs' },
+            { id: 'transactions', label: 'Transactions' },
+            { id: 'email', label: 'Email' },
+          ]}
+        />
 
         <div className="bg-white rounded-lg shadow p-6">
           {activeTab === 'users' && (
@@ -127,6 +137,10 @@ const AdminDashboard = () => {
               withdrawals={withdrawals}
               refetchTransactions={refetchTransactions}
             />
+          )}
+
+          {activeTab === 'email' && (
+            <EmailSection />
           )}
         </div>
       </div>
