@@ -10,7 +10,7 @@ import {
 
 interface UsersTableProps {
   users: Profile[];
-  children: React.ReactNode;
+  children: React.ReactNode[];
 }
 
 export const UsersTable = ({ users, children }: UsersTableProps) => (
@@ -27,7 +27,7 @@ export const UsersTable = ({ users, children }: UsersTableProps) => (
       </TableRow>
     </TableHeader>
     <TableBody>
-      {users.map((user) => (
+      {users.map((user, index) => (
         <TableRow key={user.id}>
           <TableCell>{user.email}</TableCell>
           <TableCell>{user.first_name}</TableCell>
@@ -36,7 +36,7 @@ export const UsersTable = ({ users, children }: UsersTableProps) => (
           <TableCell>{user.available_balance}€</TableCell>
           <TableCell>{user.invested_amount}€</TableCell>
           <TableCell className="space-x-2">
-            {children}
+            {children[index]}
           </TableCell>
         </TableRow>
       ))}

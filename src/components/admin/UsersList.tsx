@@ -11,16 +11,18 @@ interface UsersListProps {
 export const UsersList = ({ users, packs, refetchUsers }: UsersListProps) => {
   if (!users) return null;
 
+  const userActions = users.map((user) => (
+    <UserActions 
+      key={user.id} 
+      user={user} 
+      packs={packs}
+      refetchUsers={refetchUsers} 
+    />
+  ));
+
   return (
     <UsersTable users={users}>
-      {users.map((user) => (
-        <UserActions 
-          key={user.id} 
-          user={user} 
-          packs={packs}
-          refetchUsers={refetchUsers} 
-        />
-      ))}
+      {userActions}
     </UsersTable>
   );
 };
