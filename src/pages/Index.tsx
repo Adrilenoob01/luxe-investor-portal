@@ -4,6 +4,7 @@ import { InvestmentPack } from "@/components/InvestmentPack";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/Header";
 import { OrderProject } from "@/types/supabase";
+import { Clock, ShieldCheck, DollarSign } from "lucide-react";
 
 const Index = () => {
   const { data: projects, isLoading } = useQuery({
@@ -69,8 +70,30 @@ const Index = () => {
         </div>
 
         <div className="mt-16 text-center">
-          <h2 className="text-2xl font-bold mb-4">Pourquoi choisir WearShop Invest ?</h2>
-          <div className="grid md:grid-cols-3 gap-8 mt-8">
+          <h2 className="text-2xl font-bold mb-8">Pourquoi choisir WearShop Invest ?</h2>
+          
+          {/* Statistiques clés */}
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-primary mb-2">45 Jours</h3>
+              <p className="text-gray-600">Durée moyenne d'investissement</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <DollarSign className="w-12 h-12 text-success-DEFAULT mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-success-DEFAULT mb-2">15-20%</h3>
+              <p className="text-gray-600">Rendement moyen</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <ShieldCheck className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-primary mb-2">100%</h3>
+              <p className="text-gray-600">Articles authentiques garantis</p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
             <div className="p-6 bg-white rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-3">
                 <span role="img" aria-label="chart" className="mr-2">📈</span>
