@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -118,85 +119,87 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
         <DialogHeader>
           <DialogTitle>Demande de retrait</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <Label>Montant à retirer</Label>
-            <Input
-              type="number"
-              min={0}
-              max={availableBalance}
-              value={amount}
-              onChange={(e) => setAmount(parseFloat(e.target.value))}
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Solde disponible: {availableBalance}€
-            </p>
-          </div>
-          <div>
-            <Label>Méthode de retrait</Label>
-            <Select onValueChange={setWithdrawalMethod} value={withdrawalMethod}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez une méthode" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bank_transfer">Virement bancaire (frais: 0,50€, minimum: 9,50€)</SelectItem>
-                <SelectItem value="paypal">PayPal</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <ScrollArea className="h-[400px] pr-4">
+          <div className="space-y-4">
+            <div>
+              <Label>Montant à retirer</Label>
+              <Input
+                type="number"
+                min={0}
+                max={availableBalance}
+                value={amount}
+                onChange={(e) => setAmount(parseFloat(e.target.value))}
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Solde disponible: {availableBalance}€
+              </p>
+            </div>
+            <div>
+              <Label>Méthode de retrait</Label>
+              <Select onValueChange={setWithdrawalMethod} value={withdrawalMethod}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez une méthode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bank_transfer">Virement bancaire (frais: 0,50€, minimum: 9,50€)</SelectItem>
+                  <SelectItem value="paypal">PayPal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {withdrawalMethod === "bank_transfer" && (
-            <>
-              <div className="space-y-4">
-                <div>
-                  <Label>IBAN</Label>
-                  <Input
-                    value={bankInfo.iban}
-                    onChange={(e) => setBankInfo({ ...bankInfo, iban: e.target.value })}
-                    placeholder="FR76..."
-                  />
+            {withdrawalMethod === "bank_transfer" && (
+              <>
+                <div className="space-y-4">
+                  <div>
+                    <Label>IBAN</Label>
+                    <Input
+                      value={bankInfo.iban}
+                      onChange={(e) => setBankInfo({ ...bankInfo, iban: e.target.value })}
+                      placeholder="FR76..."
+                    />
+                  </div>
+                  <div>
+                    <Label>Prénom</Label>
+                    <Input
+                      value={bankInfo.firstName}
+                      onChange={(e) => setBankInfo({ ...bankInfo, firstName: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Nom</Label>
+                    <Input
+                      value={bankInfo.lastName}
+                      onChange={(e) => setBankInfo({ ...bankInfo, lastName: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Adresse</Label>
+                    <Input
+                      value={bankInfo.address}
+                      onChange={(e) => setBankInfo({ ...bankInfo, address: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Téléphone</Label>
+                    <Input
+                      value={bankInfo.phone}
+                      onChange={(e) => setBankInfo({ ...bankInfo, phone: e.target.value })}
+                      placeholder="+33..."
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Montant net que vous recevrez : {amount > 0 ? (amount - 0.5).toFixed(2) : 0}€
+                    <br />
+                    (Montant demandé : {amount}€ - Frais : 0,50€)
+                  </p>
                 </div>
-                <div>
-                  <Label>Prénom</Label>
-                  <Input
-                    value={bankInfo.firstName}
-                    onChange={(e) => setBankInfo({ ...bankInfo, firstName: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Nom</Label>
-                  <Input
-                    value={bankInfo.lastName}
-                    onChange={(e) => setBankInfo({ ...bankInfo, lastName: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Adresse</Label>
-                  <Input
-                    value={bankInfo.address}
-                    onChange={(e) => setBankInfo({ ...bankInfo, address: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Téléphone</Label>
-                  <Input
-                    value={bankInfo.phone}
-                    onChange={(e) => setBankInfo({ ...bankInfo, phone: e.target.value })}
-                    placeholder="+33..."
-                  />
-                </div>
-                <p className="text-sm text-gray-500">
-                  Montant net que vous recevrez : {amount > 0 ? (amount - 0.5).toFixed(2) : 0}€
-                  <br />
-                  (Montant demandé : {amount}€ - Frais : 0,50€)
-                </p>
-              </div>
-            </>
-          )}
-          <Button onClick={handleSubmitRequest}>
-            Soumettre la demande
-          </Button>
-        </div>
+              </>
+            )}
+            <Button onClick={handleSubmitRequest}>
+              Soumettre la demande
+            </Button>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
