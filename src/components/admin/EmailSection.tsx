@@ -39,23 +39,16 @@ export const EmailSection = () => {
 
     setIsSending(true);
     try {
-      const response = await fetch(
-        "https://yeogwkbyfqwacwfirqce.supabase.co/functions/v1/send-admin-email",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            to: recipient,
-            subject,
-            content,
-          }),
-        }
-      );
+      const { data, error } = await supabase.functions.invoke('send-admin-email', {
+        body: {
+          to: recipient,
+          subject,
+          content,
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de l'envoi de l'email");
+      if (error) {
+        throw error;
       }
 
       toast({
@@ -68,6 +61,7 @@ export const EmailSection = () => {
       setSubject("");
       setContent("");
     } catch (error) {
+      console.error('Error sending email:', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'envoi de l'email",
