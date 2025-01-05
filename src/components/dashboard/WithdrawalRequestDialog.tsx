@@ -55,7 +55,8 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
       const fees = withdrawalMethod === "bank_transfer" ? 0.5 : 0;
       const netAmount = amount - fees;
 
-      const { error } = await supabase
+      // Commencer une transaction pour s'assurer que les deux opérations sont atomiques
+      const { data: withdrawal, error: withdrawalError } = await supabase
         .from("withdrawals")
         .insert({
           user_id: user.id,
@@ -67,9 +68,21 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
             iban: bankInfo.iban,
             phone_number: bankInfo.phone,
           }),
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (withdrawalError) throw withdrawalError;
+
+      // Mettre à jour le solde disponible
+      const { error: balanceError } = await supabase
+        .from("profiles")
+        .update({
+          available_balance: availableBalance - amount
+        })
+        .eq("id", user.id);
+
+      if (balanceError) throw balanceError;
 
       if (withdrawalMethod === "bank_transfer") {
         const { error: emailError } = await supabase.functions.invoke("send-withdrawal-email", {
@@ -107,6 +120,8 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
       toast.error("Erreur lors de la soumission de la demande");
     }
   };
+
+  // ... keep existing code (JSX for the dialog component)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
