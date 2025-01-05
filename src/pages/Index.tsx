@@ -72,28 +72,7 @@ const Index = () => {
         <div className="mt-16 text-center">
           <h2 className="text-2xl font-bold mb-8">Pourquoi choisir WearShop Invest ?</h2>
           
-          {/* Statistiques clés */}
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-              <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-primary mb-2">45 Jours</h3>
-              <p className="text-gray-600">Durée moyenne d'investissement</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-              <DollarSign className="w-12 h-12 text-success-DEFAULT mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-success-DEFAULT mb-2">15-20%</h3>
-              <p className="text-gray-600">Rendement moyen</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-              <ShieldCheck className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-primary mb-2">100%</h3>
-              <p className="text-gray-600">Articles authentiques garantis</p>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
             <div className="p-6 bg-white rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-3">
                 <span role="img" aria-label="chart" className="mr-2">📈</span>
@@ -122,10 +101,30 @@ const Index = () => {
               </p>
             </div>
           </div>
-        </div>
-      </div>
 
-      <footer className="bg-white mt-16 py-12 border-t">
+          {/* Statistiques clés */}
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-primary mb-2">45 Jours</h3>
+              <p className="text-gray-600">Durée moyenne d'investissement</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <DollarSign className="w-12 h-12 text-success-DEFAULT mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-success-DEFAULT mb-2">15-20%</h3>
+              <p className="text-gray-600">Rendement moyen</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <ShieldCheck className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-primary mb-2">100%</h3>
+              <p className="text-gray-600">Articles authentiques garantis</p>
+            </div>
+          </div>
+        </div>
+
+        <footer className="bg-white mt-16 py-12 border-t">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             <div>
@@ -157,7 +156,8 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 };
