@@ -166,8 +166,11 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          fees: number | null
+          iban: string | null
           id: string
           is_cancelled: boolean | null
+          phone_number: string | null
           status: string
           updated_at: string
           user_id: string | null
@@ -176,8 +179,11 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          fees?: number | null
+          iban?: string | null
           id?: string
           is_cancelled?: boolean | null
+          phone_number?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -186,8 +192,11 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          fees?: number | null
+          iban?: string | null
           id?: string
           is_cancelled?: boolean | null
+          phone_number?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
