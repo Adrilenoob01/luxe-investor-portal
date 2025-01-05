@@ -1,5 +1,5 @@
 import { Header } from "@/components/Header";
-import { Diamond, ShoppingBag, Clock, ChartBarIcon, ShieldCheck, DollarSign } from "lucide-react";
+import { Clock, ShieldCheck, DollarSign } from "lucide-react";
 
 const About = () => {
   return (
@@ -13,12 +13,8 @@ const About = () => {
           </h1>
 
           <div className="space-y-12">
-            {/* Premier paragraphe avec icônes */}
+            {/* Premier paragraphe */}
             <div className="bg-white p-8 rounded-lg shadow-md">
-              <div className="flex items-center gap-4 mb-4">
-                <Diamond className="w-8 h-8 text-primary" />
-                <ShieldCheck className="w-8 h-8 text-primary" />
-              </div>
               <p className="text-lg leading-relaxed text-gray-700">
                 Chez <span className="font-semibold text-primary">WearShop</span>, nous vous offrons une opportunité unique de tirer profit du marché du luxe grâce à notre système de 
                 <span className="font-semibold"> financement participatif</span>. Vous avez l'opportunité d'investir dans des 
@@ -27,12 +23,8 @@ const About = () => {
               </p>
             </div>
 
-            {/* Deuxième paragraphe avec statistiques */}
+            {/* Deuxième paragraphe */}
             <div className="bg-white p-8 rounded-lg shadow-md">
-              <div className="flex items-center gap-4 mb-4">
-                <ShoppingBag className="w-8 h-8 text-primary" />
-                <ChartBarIcon className="w-8 h-8 text-primary" />
-              </div>
               <p className="text-lg leading-relaxed text-gray-700">
                 Ces vêtements exclusifs sont ensuite revendus par nos équipes à un prix compétitif. En seulement 
                 <span className="font-semibold text-primary"> 45 jours</span>, vous pouvez bénéficier d'un retour attractif de 
