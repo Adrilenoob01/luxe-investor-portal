@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Profile } from "@/types/profile";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const EmailSection = () => {
-  const [recipient, setRecipient] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
   const { toast } = useToast();
 
   const { data: users } = useQuery({
@@ -28,18 +30,33 @@ export const EmailSection = () => {
   });
 
   const formatContentToHtml = (text: string) => {
-    // Convertir les sauts de ligne en balises <br>
     let html = text.replace(/\n/g, '<br>');
-    // Convertir le texte entre ** en gras
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     return html;
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    setSelectAll(checked);
+    if (checked && users) {
+      setSelectedUsers(users.map(user => user.email || '').filter(Boolean));
+    } else {
+      setSelectedUsers([]);
+    }
+  };
+
+  const handleUserSelect = (email: string, checked: boolean) => {
+    if (checked) {
+      setSelectedUsers(prev => [...prev, email]);
+    } else {
+      setSelectedUsers(prev => prev.filter(e => e !== email));
+    }
+  };
+
   const handleSendEmail = async () => {
-    if (!recipient || !subject || !content) {
+    if (selectedUsers.length === 0 || !subject || !content) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs",
+        description: "Veuillez sélectionner au moins un destinataire et remplir tous les champs",
         variant: "destructive",
       });
       return;
@@ -49,32 +66,34 @@ export const EmailSection = () => {
     try {
       const formattedContent = formatContentToHtml(content);
       
-      const { data, error } = await supabase.functions.invoke('send-admin-email', {
-        body: {
-          to: recipient,
-          subject,
-          content: formattedContent,
-        },
-      });
+      // Envoyer l'email à chaque destinataire sélectionné
+      await Promise.all(selectedUsers.map(async (to) => {
+        const { error } = await supabase.functions.invoke('send-admin-email', {
+          body: {
+            to,
+            subject,
+            content: formattedContent,
+          },
+        });
 
-      if (error) {
-        throw error;
-      }
+        if (error) throw error;
+      }));
 
       toast({
         title: "Succès",
-        description: "L'email a été envoyé avec succès",
+        description: "Les emails ont été envoyés avec succès",
       });
 
       // Reset form
-      setRecipient("");
+      setSelectedUsers([]);
+      setSelectAll(false);
       setSubject("");
       setContent("");
     } catch (error) {
       console.error('Error sending email:', error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de l'email",
+        description: "Une erreur est survenue lors de l'envoi des emails",
         variant: "destructive",
       });
     } finally {
@@ -88,20 +107,38 @@ export const EmailSection = () => {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">
-            Destinataire
+            Destinataires
           </label>
-          <select
-            className="w-full rounded-md border border-input bg-background px-3 py-2"
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-          >
-            <option value="">Sélectionner un destinataire</option>
+          <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
+            <div className="flex items-center space-x-2 p-2 hover:bg-gray-50">
+              <Checkbox
+                checked={selectAll}
+                onCheckedChange={handleSelectAll}
+                id="select-all"
+              />
+              <label htmlFor="select-all" className="text-sm font-medium">
+                Sélectionner tous les utilisateurs
+              </label>
+            </div>
+            <div className="border-t" />
             {users?.map((user) => (
-              <option key={user.email} value={user.email}>
-                {user.first_name} {user.last_name} ({user.email})
-              </option>
+              user.email && (
+                <div key={user.email} className="flex items-center space-x-2 p-2 hover:bg-gray-50">
+                  <Checkbox
+                    checked={selectedUsers.includes(user.email)}
+                    onCheckedChange={(checked) => handleUserSelect(user.email!, checked)}
+                    id={`user-${user.email}`}
+                  />
+                  <label htmlFor={`user-${user.email}`} className="text-sm">
+                    {user.first_name} {user.last_name} ({user.email})
+                  </label>
+                </div>
+              )
             ))}
-          </select>
+          </div>
+          <div className="mt-2 text-sm text-gray-500">
+            {selectedUsers.length} destinataire(s) sélectionné(s)
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">
