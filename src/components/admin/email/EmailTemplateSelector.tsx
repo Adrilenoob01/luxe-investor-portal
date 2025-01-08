@@ -17,6 +17,7 @@ export const EmailTemplateSelector = ({ onTemplateChange }: EmailTemplateSelecto
         <SelectContent>
           <SelectItem value="empty">Email vide</SelectItem>
           <SelectItem value="welcome">Bienvenue chez WearShop</SelectItem>
+          <SelectItem value="investment_thank_you">Merci pour votre investissement</SelectItem>
         </SelectContent>
       </Select>
     </div>
