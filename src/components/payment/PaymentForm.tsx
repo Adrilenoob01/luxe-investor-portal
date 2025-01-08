@@ -15,6 +15,7 @@ import { AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 interface PaymentFormProps {
   packs: OrderProject[];
@@ -36,6 +37,28 @@ export const PaymentForm = ({
   getRemainingAmount,
 }: PaymentFormProps) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [useBalance, setUseBalance] = useState(false);
+  const [availableBalance, setAvailableBalance] = useState(0);
+
+  // Fetch user's available balance
+  const fetchUserBalance = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) return;
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('available_balance')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile) {
+      setAvailableBalance(profile.available_balance);
+    }
+  };
+
+  useState(() => {
+    fetchUserBalance();
+  }, []);
 
   const isAmountValid = () => {
     if (!selectedPack) return false;
@@ -69,6 +92,43 @@ export const PaymentForm = ({
         return;
       }
 
+      if (useBalance) {
+        if (amount > availableBalance) {
+          toast.error("Solde insuffisant");
+          return;
+        }
+
+        // Create investment using balance
+        const { error: investmentError } = await supabase
+          .from('investments')
+          .insert({
+            user_id: session.user.id,
+            project_id: selectedPack.id,
+            amount: amount,
+            payment_method: 'balance',
+            status: 'completed'
+          });
+
+        if (investmentError) throw investmentError;
+
+        // Update user's balance
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            available_balance: availableBalance - amount,
+            invested_amount: amount,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', session.user.id);
+
+        if (updateError) throw updateError;
+
+        toast.success("Investissement effectué avec succès");
+        setShowConfirmDialog(false);
+        return;
+      }
+
+      // Regular Stripe payment flow
       const { data, error } = await supabase.functions.invoke('create-stripe-session', {
         body: {
           amount: amount,
@@ -82,8 +142,8 @@ export const PaymentForm = ({
 
       window.location.href = data.url;
     } catch (error) {
-      console.error('Error creating Stripe session:', error);
-      toast.error("Erreur lors de la création de la session de paiement");
+      console.error('Error processing investment:', error);
+      toast.error("Erreur lors du traitement de l'investissement");
     } finally {
       setShowConfirmDialog(false);
     }
@@ -126,11 +186,33 @@ export const PaymentForm = ({
             </p>
           </div>
 
+          {availableBalance > 0 && (
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="use-balance"
+                checked={useBalance}
+                onCheckedChange={setUseBalance}
+              />
+              <Label htmlFor="use-balance">
+                Utiliser mon solde disponible ({availableBalance}€)
+              </Label>
+            </div>
+          )}
+
           {!isAmountValid() && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 Le montant doit être compris entre {selectedPack.min_amount}€ et {getRemainingAmount()}€
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {useBalance && amount > availableBalance && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Le montant dépasse votre solde disponible ({availableBalance}€)
               </AlertDescription>
             </Alert>
           )}
@@ -141,15 +223,17 @@ export const PaymentForm = ({
               disabled={!isAmountValid() || isProcessing}
               className="flex-1"
             >
-              Procéder à l'investissement
+              {useBalance ? "Réinvestir mon solde" : "Procéder à l'investissement"}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleCashPayment}
-              className="flex-1"
-            >
-              Je paye en espèces
-            </Button>
+            {!useBalance && (
+              <Button
+                variant="outline"
+                onClick={handleCashPayment}
+                className="flex-1"
+              >
+                Je paye en espèces
+              </Button>
+            )}
           </div>
 
           <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
@@ -163,11 +247,20 @@ export const PaymentForm = ({
                   <p className="text-sm text-muted-foreground">
                     Projet : {selectedPack.name}
                   </p>
+                  {useBalance && (
+                    <p className="text-sm text-muted-foreground">
+                      Méthode : Réinvestissement du solde disponible
+                    </p>
+                  )}
                 </div>
 
                 <Alert className="bg-muted">
                   <AlertDescription className="text-sm">
-                    Une fois que votre paiement sera accepté, votre investissement sera traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact@wearshops.fr en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement.
+                    {useBalance ? (
+                      "Votre solde disponible sera utilisé pour cet investissement. Le montant sera immédiatement déduit de votre solde."
+                    ) : (
+                      "Une fois que votre paiement sera accepté, votre investissement sera traité par nos équipes et ajouté à votre compte d'ici 24h. Si ce n'est pas le cas, merci de nous contacter à contact@wearshops.fr en fournissant une preuve de paiement ainsi que les informations de votre compte client afin que nos équipes puissent traiter votre investissement."
+                    )}
                   </AlertDescription>
                 </Alert>
 
@@ -176,7 +269,7 @@ export const PaymentForm = ({
                   disabled={isProcessing}
                   className="w-full"
                 >
-                  Confirmer et payer
+                  Confirmer {useBalance ? "le réinvestissement" : "et payer"}
                 </Button>
               </div>
             </DialogContent>
