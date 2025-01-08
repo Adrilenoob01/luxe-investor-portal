@@ -154,17 +154,23 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline">Modifier mes informations</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Mes informations personnelles</DialogTitle>
-              </DialogHeader>
-              <ProfileForm />
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-4">
+            <WithdrawalRequestDialog
+              availableBalance={profile?.available_balance || 0}
+              onRequestSubmitted={refetchWithdrawals}
+            />
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">Modifier mes informations</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Mes informations personnelles</DialogTitle>
+                </DialogHeader>
+                <ProfileForm />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
         
         <PortfolioStats 
@@ -182,13 +188,6 @@ const Dashboard = () => {
           investments={investments} 
           withdrawals={withdrawals} 
         />
-
-        <div className="mt-8 flex justify-end">
-          <WithdrawalRequestDialog
-            availableBalance={profile?.available_balance || 0}
-            onRequestSubmitted={refetchWithdrawals}
-          />
-        </div>
       </main>
     </div>
   );
