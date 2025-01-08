@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { WithdrawalForm } from "./WithdrawalForm";
+import { BankInfo } from "@/types/withdrawal";
 
 interface WithdrawalRequestDialogProps {
   availableBalance: number;
@@ -16,7 +18,7 @@ interface WithdrawalRequestDialogProps {
 export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }: WithdrawalRequestDialogProps) => {
   const [amount, setAmount] = useState<number>(0);
   const [withdrawalMethod, setWithdrawalMethod] = useState<string>("");
-  const [bankInfo, setBankInfo] = useState({
+  const [bankInfo, setBankInfo] = useState<BankInfo>({
     iban: "",
     firstName: "",
     lastName: "",
@@ -55,7 +57,6 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
       const fees = withdrawalMethod === "bank_transfer" ? 0.5 : 0;
       const netAmount = amount - fees;
 
-      // Commencer une transaction pour s'assurer que les deux opérations sont atomiques
       const { data: withdrawal, error: withdrawalError } = await supabase
         .from("withdrawals")
         .insert({
@@ -74,7 +75,6 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
 
       if (withdrawalError) throw withdrawalError;
 
-      // Mettre à jour le solde disponible
       const { error: balanceError } = await supabase
         .from("profiles")
         .update({
@@ -121,8 +121,6 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
     }
   };
 
-  // ... keep existing code (JSX for the dialog component)
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -157,59 +155,19 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bank_transfer">Virement bancaire (frais: 0,50€, minimum: 9,50€)</SelectItem>
-                  <SelectItem value="paypal">PayPal</SelectItem>
+                  <SelectItem value="cash">Espèces</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {withdrawalMethod === "bank_transfer" && (
-              <>
-                <div className="space-y-4">
-                  <div>
-                    <Label>IBAN</Label>
-                    <Input
-                      value={bankInfo.iban}
-                      onChange={(e) => setBankInfo({ ...bankInfo, iban: e.target.value })}
-                      placeholder="FR76..."
-                    />
-                  </div>
-                  <div>
-                    <Label>Prénom</Label>
-                    <Input
-                      value={bankInfo.firstName}
-                      onChange={(e) => setBankInfo({ ...bankInfo, firstName: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Nom</Label>
-                    <Input
-                      value={bankInfo.lastName}
-                      onChange={(e) => setBankInfo({ ...bankInfo, lastName: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Adresse</Label>
-                    <Input
-                      value={bankInfo.address}
-                      onChange={(e) => setBankInfo({ ...bankInfo, address: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Téléphone</Label>
-                    <Input
-                      value={bankInfo.phone}
-                      onChange={(e) => setBankInfo({ ...bankInfo, phone: e.target.value })}
-                      placeholder="+33..."
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Montant net que vous recevrez : {amount > 0 ? (amount - 0.5).toFixed(2) : 0}€
-                    <br />
-                    (Montant demandé : {amount}€ - Frais : 0,50€)
-                  </p>
-                </div>
-              </>
+              <WithdrawalForm 
+                bankInfo={bankInfo}
+                setBankInfo={setBankInfo}
+                amount={amount}
+              />
             )}
+            
             <Button onClick={handleSubmitRequest}>
               Soumettre la demande
             </Button>

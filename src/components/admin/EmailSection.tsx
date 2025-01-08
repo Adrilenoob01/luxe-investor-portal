@@ -49,6 +49,10 @@ export const EmailSection = () => {
       setSelectedUsers(prev => [...prev, email]);
     } else {
       setSelectedUsers(prev => prev.filter(e => e !== email));
+      // Si on désélectionne un utilisateur, on vérifie si "Tout sélectionner" doit être décoché
+      if (users && users.length === selectedUsers.length) {
+        setSelectAll(false);
+      }
     }
   };
 
