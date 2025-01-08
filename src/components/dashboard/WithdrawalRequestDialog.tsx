@@ -54,6 +54,14 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile) throw new Error("Profil non trouvé");
+
       const fees = withdrawalMethod === "bank_transfer" ? 0.5 : 0;
       const netAmount = amount - fees;
 
@@ -84,23 +92,24 @@ export const WithdrawalRequestDialog = ({ availableBalance, onRequestSubmitted }
 
       if (balanceError) throw balanceError;
 
-      if (withdrawalMethod === "bank_transfer") {
-        const { error: emailError } = await supabase.functions.invoke("send-withdrawal-email", {
-          body: {
-            firstName: bankInfo.firstName,
-            lastName: bankInfo.lastName,
+      const { error: emailError } = await supabase.functions.invoke("send-withdrawal-email", {
+        body: {
+          firstName: withdrawalMethod === "bank_transfer" ? bankInfo.firstName : profile.first_name,
+          lastName: withdrawalMethod === "bank_transfer" ? bankInfo.lastName : profile.last_name,
+          ...(withdrawalMethod === "bank_transfer" && {
             address: bankInfo.address,
             phone: bankInfo.phone,
             iban: bankInfo.iban,
-            amount: amount,
-            netAmount: netAmount,
-          },
-        });
+          }),
+          amount: amount,
+          netAmount: netAmount,
+          withdrawalMethod: withdrawalMethod,
+        },
+      });
 
-        if (emailError) {
-          console.error("Error sending email:", emailError);
-          toast.error("La demande a été enregistrée mais l'email n'a pas pu être envoyé");
-        }
+      if (emailError) {
+        console.error("Error sending email:", emailError);
+        toast.error("La demande a été enregistrée mais l'email n'a pas pu être envoyé");
       }
 
       toast.success("Demande de retrait soumise avec succès");

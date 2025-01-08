@@ -10,11 +10,12 @@ const corsHeaders = {
 interface WithdrawalEmailRequest {
   firstName: string;
   lastName: string;
-  address: string;
-  phone: string;
-  iban: string;
+  address?: string;
+  phone?: string;
+  iban?: string;
   amount: number;
   netAmount: number;
+  withdrawalMethod: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -23,19 +24,26 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { firstName, lastName, address, phone, iban, amount, netAmount }: WithdrawalEmailRequest = await req.json();
+    const { firstName, lastName, address, phone, iban, amount, netAmount, withdrawalMethod }: WithdrawalEmailRequest = await req.json();
 
-    const emailContent = `
-      Nouvelle demande de retrait par virement bancaire:
+    let emailContent = `
+      Nouvelle demande de retrait ${withdrawalMethod === 'bank_transfer' ? 'par virement bancaire' : 'en espèces'}:
       
       Prénom: ${firstName}
       Nom: ${lastName}
+    `;
+
+    if (withdrawalMethod === 'bank_transfer') {
+      emailContent += `
       Adresse: ${address}
       Téléphone: ${phone}
-      IBAN: ${iban}
+      IBAN: ${iban}`;
+    }
+
+    emailContent += `
       Montant demandé: ${amount}€
-      Frais: 0.50€
-      Montant net: ${netAmount}€
+      ${withdrawalMethod === 'bank_transfer' ? `Frais: 0.50€
+      Montant net: ${netAmount}€` : ''}
     `;
 
     const res = await fetch("https://api.resend.com/emails", {
