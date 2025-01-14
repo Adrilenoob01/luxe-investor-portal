@@ -21,6 +21,10 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { to, subject, content }: EmailRequest = await req.json();
 
+    console.log("Sending email to:", to);
+    console.log("Subject:", subject);
+    console.log("Content:", content);
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -36,13 +40,19 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!res.ok) {
-      throw new Error("Failed to send email");
+      const error = await res.text();
+      console.error("Resend API error:", error);
+      throw new Error(`Failed to send email: ${error}`);
     }
+
+    const data = await res.json();
+    console.log("Email sent successfully:", data);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Error sending email:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
