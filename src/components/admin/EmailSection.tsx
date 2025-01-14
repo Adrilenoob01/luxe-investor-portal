@@ -10,6 +10,8 @@ import { EmailTemplateSelector } from "./email/EmailTemplateSelector";
 import { RecipientsSelector } from "./email/RecipientsSelector";
 import { TEMPLATES } from "./email/EmailTemplates";
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const EmailSection = () => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
@@ -77,17 +79,25 @@ export const EmailSection = () => {
     try {
       const formattedContent = formatContentToHtml(content);
       
-      await Promise.all(selectedUsers.map(async (to) => {
-        const { error } = await supabase.functions.invoke('send-admin-email', {
-          body: {
-            to,
-            subject,
-            content: formattedContent,
-          },
-        });
+      for (const to of selectedUsers) {
+        try {
+          const { error } = await supabase.functions.invoke('send-admin-email', {
+            body: {
+              to,
+              subject,
+              content: formattedContent,
+            },
+          });
 
-        if (error) throw error;
-      }));
+          if (error) throw error;
+          
+          // Add a 500ms delay between each email to avoid rate limiting
+          await sleep(500);
+        } catch (error) {
+          console.error('Error sending email to', to, ':', error);
+          throw error;
+        }
+      }
 
       toast({
         title: "Succès",
@@ -99,7 +109,7 @@ export const EmailSection = () => {
       setSubject("");
       setContent("");
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error('Error sending emails:', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'envoi des emails",
