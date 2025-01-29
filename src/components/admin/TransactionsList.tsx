@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { EditTransactionDialog } from "./EditTransactionDialog";
 import { Shield, ShieldOff } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface TransactionsListProps {
   investments: Investment[] | null;
@@ -45,7 +45,7 @@ export const TransactionsList = ({ investments, withdrawals, refetchTransactions
       amount: inv.amount,
       status: inv.status,
       details: `Investissement - ${inv.order_projects?.name || 'N/A'}`,
-      hasInsurance: inv.has_insurance,
+      hasInsurance: inv.has_insurance ?? false,
       originalData: inv,
     })) || []),
     ...(withdrawals?.map(w => ({
