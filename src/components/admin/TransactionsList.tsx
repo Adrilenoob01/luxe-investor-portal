@@ -8,6 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EditTransactionDialog } from "./EditTransactionDialog";
+import { Shield, ShieldOff } from "lucide-react";
+import { Tooltip } from "@/components/ui/tooltip";
 
 interface TransactionsListProps {
   investments: Investment[] | null;
@@ -26,6 +28,7 @@ type CombinedTransaction = {
   amount: number;
   status: string;
   details: string;
+  hasInsurance?: boolean;
   originalData: Investment | Withdrawal;
 };
 
@@ -42,6 +45,7 @@ export const TransactionsList = ({ investments, withdrawals, refetchTransactions
       amount: inv.amount,
       status: inv.status,
       details: `Investissement - ${inv.order_projects?.name || 'N/A'}`,
+      hasInsurance: inv.has_insurance,
       originalData: inv,
     })) || []),
     ...(withdrawals?.map(w => ({
@@ -69,6 +73,7 @@ export const TransactionsList = ({ investments, withdrawals, refetchTransactions
           <TableHead>Détails</TableHead>
           <TableHead>Montant</TableHead>
           <TableHead>Statut</TableHead>
+          <TableHead>Assurance</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -87,6 +92,17 @@ export const TransactionsList = ({ investments, withdrawals, refetchTransactions
             <TableCell>{transaction.details}</TableCell>
             <TableCell>{transaction.amount}€</TableCell>
             <TableCell>{transaction.status}</TableCell>
+            <TableCell>
+              {transaction.type === 'investment' && (
+                <Tooltip content={transaction.hasInsurance ? "Capital assuré" : "Capital non assuré"}>
+                  {transaction.hasInsurance ? (
+                    <Shield className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <ShieldOff className="h-4 w-4 text-gray-400" />
+                  )}
+                </Tooltip>
+              )}
+            </TableCell>
             <TableCell>
               <EditTransactionDialog 
                 transaction={transaction.originalData}
