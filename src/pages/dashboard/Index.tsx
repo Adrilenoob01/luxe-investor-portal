@@ -110,10 +110,14 @@ const Dashboard = () => {
     },
   });
 
-  // Calculate estimated returns
+  // Calculate estimated returns only for active investments (not paid)
   const estimatedReturns = investments.reduce((sum, inv) => {
-    const returnRate = inv.order_projects?.return_rate || 0;
-    return sum + (Number(inv.amount) * (returnRate / 100));
+    // Only include investments where the project is not in 'paid' status
+    if (inv.order_projects?.status !== 'paid') {
+      const returnRate = inv.order_projects?.return_rate || 0;
+      return sum + (Number(inv.amount) * (returnRate / 100));
+    }
+    return sum;
   }, 0) || 0;
 
   if (profileLoading) {
