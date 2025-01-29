@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          has_insurance: boolean | null
           id: string
           is_cancelled: boolean | null
           payment_method: string
@@ -24,6 +25,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          has_insurance?: boolean | null
           id?: string
           is_cancelled?: boolean | null
           payment_method: string
@@ -35,6 +37,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          has_insurance?: boolean | null
           id?: string
           is_cancelled?: boolean | null
           payment_method?: string
