@@ -40,11 +40,13 @@ export const InvestmentPack = ({
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
       case 'collecting':
-        return 'bg-green-100 text-green-800';
+        return 'bg-blue-100 text-blue-800';
       case 'completed':
         return 'bg-gray-100 text-gray-800';
       case 'upcoming':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-orange-100 text-orange-800';
+      case 'paid':
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -58,6 +60,8 @@ export const InvestmentPack = ({
         return 'Terminée';
       case 'upcoming':
         return 'Prochainement';
+      case 'paid':
+        return 'Intérêts payés';
       default:
         return status;
     }
@@ -139,13 +143,15 @@ export const InvestmentPack = ({
           <Button 
             className="w-full" 
             onClick={() => navigate("/payment")}
-            disabled={status === 'completed' || status === 'upcoming'}
+            disabled={status === 'completed' || status === 'upcoming' || status === 'paid'}
           >
             {status === 'completed' 
               ? 'Objectif atteint' 
               : status === 'upcoming' 
                 ? 'Prochainement' 
-                : 'Investir'}
+                : status === 'paid'
+                  ? 'Intérêts payés'
+                  : 'Investir'}
           </Button>
         </div>
       </div>
