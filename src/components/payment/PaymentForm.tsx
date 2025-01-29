@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PaymentFormProps {
   packs: OrderProject[];
@@ -39,6 +40,7 @@ export const PaymentForm = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [useBalance, setUseBalance] = useState(false);
   const [availableBalance, setAvailableBalance] = useState(0);
+  const [hasInsurance, setHasInsurance] = useState(false);
 
   // Fetch user's available balance
   const fetchUserBalance = async () => {
@@ -59,6 +61,10 @@ export const PaymentForm = ({
   useState(() => {
     fetchUserBalance();
   }, []);
+
+  const getTotalAmount = () => {
+    return hasInsurance ? amount + 5 : amount;
+  };
 
   const isAmountValid = () => {
     if (!selectedPack) return false;
@@ -93,7 +99,7 @@ export const PaymentForm = ({
       }
 
       if (useBalance) {
-        if (amount > availableBalance) {
+        if (getTotalAmount() > availableBalance) {
           toast.error("Solde insuffisant");
           return;
         }
@@ -104,9 +110,10 @@ export const PaymentForm = ({
           .insert({
             user_id: session.user.id,
             project_id: selectedPack.id,
-            amount: amount,
+            amount: getTotalAmount(),
             payment_method: 'balance',
-            status: 'completed'
+            status: 'completed',
+            has_insurance: hasInsurance
           });
 
         if (investmentError) throw investmentError;
@@ -115,8 +122,8 @@ export const PaymentForm = ({
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
-            available_balance: availableBalance - amount,
-            invested_amount: amount,
+            available_balance: availableBalance - getTotalAmount(),
+            invested_amount: getTotalAmount(),
             updated_at: new Date().toISOString(),
           })
           .eq('id', session.user.id);
@@ -131,9 +138,10 @@ export const PaymentForm = ({
       // Regular Stripe payment flow
       const { data, error } = await supabase.functions.invoke('create-stripe-session', {
         body: {
-          amount: amount,
+          amount: getTotalAmount(),
           projectId: selectedPack.id,
           projectName: selectedPack.name,
+          hasInsurance: hasInsurance
         }
       });
 
@@ -186,6 +194,28 @@ export const PaymentForm = ({
             </p>
           </div>
 
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="insurance"
+              checked={hasInsurance}
+              onCheckedChange={(checked) => setHasInsurance(checked as boolean)}
+            />
+            <div className="grid gap-1.5 leading-none">
+              <Label
+                htmlFor="insurance"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Je souhaite assurer mon capital à 100%
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Tout investissement comporte des risques, mais avec WearShop et son assurance, 
+                faites vous rembourser de l'intégralité de votre capital investi au bout de 45 jours 
+                en cas de problème dans la mise en vente de nos articles... Vous pourrez ainsi dormir tranquille !
+                (+5€)
+              </p>
+            </div>
+          </div>
+
           {availableBalance > 0 && (
             <div className="flex items-center space-x-2">
               <Switch
@@ -208,7 +238,7 @@ export const PaymentForm = ({
             </Alert>
           )}
 
-          {useBalance && amount > availableBalance && (
+          {useBalance && getTotalAmount() > availableBalance && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
@@ -244,6 +274,12 @@ export const PaymentForm = ({
               <div className="space-y-4">
                 <div className="text-center space-y-2">
                   <p className="font-semibold">Montant : {amount}€</p>
+                  {hasInsurance && (
+                    <p className="text-sm text-muted-foreground">
+                      Assurance capital : +5€
+                    </p>
+                  )}
+                  <p className="font-semibold">Total : {getTotalAmount()}€</p>
                   <p className="text-sm text-muted-foreground">
                     Projet : {selectedPack.name}
                   </p>
