@@ -56,14 +56,30 @@ const AdminDashboard = () => {
         .from('investments')
         .select(`
           *,
-          profiles (
+          profiles:profiles (
             id,
             first_name,
             last_name
           ),
-          order_projects (
+          order_projects:order_projects (
             id,
-            name
+            name,
+            return_rate,
+            description,
+            is_active,
+            target_amount,
+            collected_amount,
+            implementation_date,
+            end_date,
+            status,
+            image_url,
+            short_description,
+            detailed_description,
+            location,
+            category,
+            created_at,
+            updated_at,
+            min_amount
           )
         `);
       if (error) throw error;
