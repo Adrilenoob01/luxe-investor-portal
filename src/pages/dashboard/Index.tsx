@@ -18,7 +18,6 @@ import { WithdrawalRequestDialog } from "@/components/dashboard/WithdrawalReques
 import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
 import { ActiveInvestments } from "@/components/dashboard/ActiveInvestments";
 import { PortfolioStats } from "@/components/dashboard/PortfolioStats";
-import { PortfolioChart } from "@/components/dashboard/PortfolioChart";
 import { useState } from "react";
 
 const Dashboard = () => {
@@ -49,7 +48,6 @@ const Dashboard = () => {
 
       if (error) throw error;
       
-      // Check if profile is incomplete
       if (!data.first_name || !data.last_name) {
         setShowProfileDialog(true);
       }
@@ -112,21 +110,11 @@ const Dashboard = () => {
     },
   });
 
-  // Calculate portfolio metrics for the chart
-  const totalInvested = investments.reduce((sum, inv) => sum + Number(inv.amount), 0) || 0;
+  // Calculate estimated returns
   const estimatedReturns = investments.reduce((sum, inv) => {
     const returnRate = inv.order_projects?.return_rate || 0;
     return sum + (Number(inv.amount) * (returnRate / 100));
   }, 0) || 0;
-
-  const portfolioData = [
-    { month: "Jan", value: totalInvested },
-    { month: "Feb", value: totalInvested * 1.02 },
-    { month: "Mar", value: totalInvested * 1.04 },
-    { month: "Apr", value: totalInvested * 1.06 },
-    { month: "May", value: totalInvested * 1.08 },
-    { month: "Jun", value: totalInvested * 1.10 },
-  ];
 
   if (profileLoading) {
     return (
@@ -179,8 +167,7 @@ const Dashboard = () => {
           estimatedReturns={estimatedReturns}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <PortfolioChart data={portfolioData} />
+        <div className="grid grid-cols-1 gap-8 mb-8">
           <ActiveInvestments investments={investments} />
         </div>
 
