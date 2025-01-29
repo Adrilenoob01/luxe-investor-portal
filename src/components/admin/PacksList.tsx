@@ -74,6 +74,21 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'collecting':
+        return 'En cours';
+      case 'completed':
+        return 'Terminée';
+      case 'upcoming':
+        return 'Prochainement';
+      case 'paid':
+        return 'Intérêts payés';
+      default:
+        return status;
+    }
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -93,7 +108,7 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
             <TableCell>{pack.target_amount}€</TableCell>
             <TableCell>{pack.collected_amount}€</TableCell>
             <TableCell>{pack.return_rate}%</TableCell>
-            <TableCell>{pack.status}</TableCell>
+            <TableCell>{getStatusLabel(pack.status)}</TableCell>
             <TableCell className="space-x-2">
               <EditOrderDialog pack={pack} onUpdate={handleUpdatePack} />
               <AlertDialog>

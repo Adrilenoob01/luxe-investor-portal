@@ -86,6 +86,7 @@ export const EditOrderDialog = ({ pack, onUpdate }: EditOrderDialogProps) => {
                   <SelectItem value="collecting">En cours</SelectItem>
                   <SelectItem value="completed">Terminée</SelectItem>
                   <SelectItem value="upcoming">Prochainement</SelectItem>
+                  <SelectItem value="paid">Intérêts payés</SelectItem>
                 </SelectContent>
               </Select>
             </div>

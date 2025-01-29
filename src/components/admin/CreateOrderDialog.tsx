@@ -34,6 +34,7 @@ export const CreateOrderDialog = ({ onOrderCreated }: CreateOrderDialogProps) =>
           implementation_date: newPack.implementationDate,
           end_date: newPack.endDate,
           min_amount: newPack.minAmount,
+          status: 'upcoming' // Par défaut, une nouvelle commande est en "Prochainement"
         });
 
       if (error) throw error;
