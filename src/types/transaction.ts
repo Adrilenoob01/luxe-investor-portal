@@ -23,6 +23,7 @@ export interface Investment extends BaseTransaction {
   project_id: string | null;
   payment_method: string;
   order_projects?: OrderProject;
+  has_insurance?: boolean | null;
 }
 
 export interface Withdrawal extends BaseTransaction {

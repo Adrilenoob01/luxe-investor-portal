@@ -6,11 +6,16 @@ interface ActiveInvestmentsProps {
 }
 
 export const ActiveInvestments = ({ investments }: ActiveInvestmentsProps) => {
+  // Filter out investments where the associated project has status 'paid'
+  const activeInvestments = investments.filter(
+    (investment) => investment.order_projects?.status !== 'paid'
+  );
+
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-4">Investissements actifs</h3>
       <div className="space-y-4">
-        {investments.map((investment) => (
+        {activeInvestments.map((investment) => (
           <div
             key={investment.id}
             className="flex justify-between items-start p-4 bg-gray-50 rounded-lg"
@@ -27,7 +32,7 @@ export const ActiveInvestments = ({ investments }: ActiveInvestmentsProps) => {
             <p className="font-semibold">{Number(investment.amount).toLocaleString()}€</p>
           </div>
         ))}
-        {investments.length === 0 && (
+        {activeInvestments.length === 0 && (
           <p className="text-center text-gray-500">Aucun investissement actif</p>
         )}
       </div>
