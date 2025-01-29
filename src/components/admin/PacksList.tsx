@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { EditOrderDialog } from "./EditOrderDialog";
+import { cn } from "@/lib/utils";
 
 interface PacksListProps {
   packs: OrderProject[] | null;
@@ -77,15 +78,15 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'collecting':
-        return 'En cours';
+        return { label: 'En cours', className: 'text-blue-600' };
       case 'completed':
-        return 'Terminée';
+        return { label: 'Terminée', className: 'text-gray-600' };
       case 'upcoming':
-        return 'Prochainement';
+        return { label: 'Prochainement', className: 'text-orange-600' };
       case 'paid':
-        return 'Intérêts payés';
+        return { label: 'Intérêts payés', className: 'text-green-600' };
       default:
-        return status;
+        return { label: status, className: '' };
     }
   };
 
@@ -108,7 +109,9 @@ export const PacksList = ({ packs, refetchPacks }: PacksListProps) => {
             <TableCell>{pack.target_amount}€</TableCell>
             <TableCell>{pack.collected_amount}€</TableCell>
             <TableCell>{pack.return_rate}%</TableCell>
-            <TableCell>{getStatusLabel(pack.status)}</TableCell>
+            <TableCell className={cn(getStatusLabel(pack.status).className)}>
+              {getStatusLabel(pack.status).label}
+            </TableCell>
             <TableCell className="space-x-2">
               <EditOrderDialog pack={pack} onUpdate={handleUpdatePack} />
               <AlertDialog>
