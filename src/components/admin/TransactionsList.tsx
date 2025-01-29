@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { EditTransactionDialog } from "./EditTransactionDialog";
 import { Shield, ShieldOff } from "lucide-react";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TransactionsListProps {
   investments: Investment[] | null;
@@ -94,13 +94,20 @@ export const TransactionsList = ({ investments, withdrawals, refetchTransactions
             <TableCell>{transaction.status}</TableCell>
             <TableCell>
               {transaction.type === 'investment' && (
-                <Tooltip content={transaction.hasInsurance ? "Capital assuré" : "Capital non assuré"}>
-                  {transaction.hasInsurance ? (
-                    <Shield className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <ShieldOff className="h-4 w-4 text-gray-400" />
-                  )}
-                </Tooltip>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      {transaction.hasInsurance ? (
+                        <Shield className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <ShieldOff className="h-4 w-4 text-gray-400" />
+                      )}
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {transaction.hasInsurance ? "Capital assuré" : "Capital non assuré"}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </TableCell>
             <TableCell>

@@ -13,14 +13,13 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, projectId, projectName } = await req.json();
+    const { amount, projectId, projectName, hasInsurance, investmentAmount } = await req.json();
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     );
 
-    // Get the user from the auth header
     const authHeader = req.headers.get('Authorization')!;
     const token = authHeader.replace('Bearer ', '');
     const { data: { user } } = await supabaseClient.auth.getUser(token);
@@ -33,11 +32,8 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    // Get the base URL from the request origin
     const baseUrl = req.headers.get('origin') || '';
-    console.log('Base URL:', baseUrl);
 
-    console.log('Creating payment session...');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -45,9 +41,9 @@ serve(async (req) => {
           price_data: {
             currency: 'eur',
             product_data: {
-              name: `Investissement - ${projectName}`,
+              name: `Investissement - ${projectName}${hasInsurance ? ' (avec assurance)' : ''}`,
             },
-            unit_amount: amount * 100, // Stripe expects amounts in cents
+            unit_amount: amount * 100,
           },
           quantity: 1,
         },
@@ -59,10 +55,11 @@ serve(async (req) => {
         user_id: user.id,
         project_id: projectId,
         amount: amount,
+        has_insurance: hasInsurance ? 'true' : 'false',
+        investment_amount: investmentAmount
       },
     });
 
-    console.log('Payment session created:', session.id);
     return new Response(
       JSON.stringify({ url: session.url }),
       { 

@@ -42,7 +42,6 @@ export const PaymentForm = ({
   const [availableBalance, setAvailableBalance] = useState(0);
   const [hasInsurance, setHasInsurance] = useState(false);
 
-  // Fetch user's available balance
   const fetchUserBalance = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user?.id) return;
@@ -62,9 +61,8 @@ export const PaymentForm = ({
     fetchUserBalance();
   }, []);
 
-  const getTotalAmount = () => {
-    return hasInsurance ? amount + 5 : amount;
-  };
+  const getInsuranceFee = () => hasInsurance ? 5 : 0;
+  const getTotalAmount = () => amount + getInsuranceFee();
 
   const isAmountValid = () => {
     if (!selectedPack) return false;
@@ -73,7 +71,6 @@ export const PaymentForm = ({
   };
 
   const handleProceedClick = () => {
-    console.log("Opening confirmation dialog");
     if (isAmountValid()) {
       setShowConfirmDialog(true);
     }
@@ -104,13 +101,12 @@ export const PaymentForm = ({
           return;
         }
 
-        // Create investment using balance
         const { error: investmentError } = await supabase
           .from('investments')
           .insert({
             user_id: session.user.id,
             project_id: selectedPack.id,
-            amount: getTotalAmount(),
+            amount: getTotalAmount(), // Total amount including insurance
             payment_method: 'balance',
             status: 'completed',
             has_insurance: hasInsurance
@@ -118,12 +114,11 @@ export const PaymentForm = ({
 
         if (investmentError) throw investmentError;
 
-        // Update user's balance
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
             available_balance: availableBalance - getTotalAmount(),
-            invested_amount: getTotalAmount(),
+            invested_amount: amount, // Only the investment amount, not including insurance
             updated_at: new Date().toISOString(),
           })
           .eq('id', session.user.id);
@@ -135,13 +130,13 @@ export const PaymentForm = ({
         return;
       }
 
-      // Regular Stripe payment flow
       const { data, error } = await supabase.functions.invoke('create-stripe-session', {
         body: {
-          amount: getTotalAmount(),
+          amount: getTotalAmount(), // Total amount including insurance
           projectId: selectedPack.id,
           projectName: selectedPack.name,
-          hasInsurance: hasInsurance
+          hasInsurance: hasInsurance,
+          investmentAmount: amount // Only the investment amount, not including insurance
         }
       });
 
