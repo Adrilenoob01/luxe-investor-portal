@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth"; // Assuming you have an auth hook
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -11,11 +10,7 @@ export const Header = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link to="/" className="flex items-center">
-              <img
-                src="/lovable-uploads/d3d10ae7-bd96-486f-b4fb-4c0a9810ac96.png"
-                alt="Logo"
-                className="h-8 w-auto"
-              />
+              <span className="text-xl font-bold">Logo</span>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
@@ -38,23 +33,14 @@ export const Header = () => {
               </Link>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center">
             {user ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center space-x-2 text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  <User className="h-5 w-5" />
-                  <span>Mon compte</span>
-                </Link>
-                <button
-                  onClick={logout}
-                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  Déconnexion
-                </button>
-              </>
+              <button
+                onClick={logout}
+                className="text-sm font-medium text-gray-500 hover:text-gray-900"
+              >
+                Déconnexion
+              </button>
             ) : (
               <Link
                 to="/login"

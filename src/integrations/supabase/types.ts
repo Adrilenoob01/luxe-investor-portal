@@ -67,7 +67,6 @@ export type Database = {
         Row: {
           author_id: string | null
           content: string
-          created_at: string
           id: string
           image_url: string | null
           is_published: boolean | null
@@ -78,7 +77,6 @@ export type Database = {
         Insert: {
           author_id?: string | null
           content: string
-          created_at?: string
           id?: string
           image_url?: string | null
           is_published?: boolean | null
@@ -89,7 +87,6 @@ export type Database = {
         Update: {
           author_id?: string | null
           content?: string
-          created_at?: string
           id?: string
           image_url?: string | null
           is_published?: boolean | null
