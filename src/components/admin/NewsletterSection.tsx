@@ -34,7 +34,6 @@ export const NewsletterSection = () => {
         console.error("Error fetching user profile:", error);
         throw error;
       }
-      console.log("User profile data:", data); // Debug log
       return data;
     },
     enabled: !!user?.id,
@@ -199,12 +198,9 @@ export const NewsletterSection = () => {
     }
   };
 
-  if (isLoadingProfile) {
-    console.log("Loading profile..."); // Debug log
+  if (isLoadingProfile || isLoadingArticles) {
     return <div>Chargement...</div>;
   }
-
-  console.log("Is admin:", userProfile?.is_admin); // Debug log
 
   return (
     <div className="space-y-6">
@@ -268,59 +264,55 @@ export const NewsletterSection = () => {
         </div>
       )}
 
-      {isLoadingArticles ? (
-        <div>Chargement des articles...</div>
-      ) : (
-        <div className="space-y-4">
-          {articles?.map((article) => (
-            <div
-              key={article.id}
-              className="bg-white p-4 rounded-lg shadow flex justify-between items-start"
-            >
-              <div className="space-y-2 flex-1">
-                <h3 className="font-semibold">{article.title}</h3>
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {article.content}
-                </p>
-                <div className="text-sm text-gray-500">
-                  {format(new Date(article.published_at || new Date()), "d MMMM yyyy", {
-                    locale: fr,
-                  })}
-                </div>
+      <div className="space-y-4">
+        {articles?.map((article) => (
+          <div
+            key={article.id}
+            className="bg-white p-4 rounded-lg shadow flex justify-between items-start"
+          >
+            <div className="space-y-2 flex-1">
+              <h3 className="font-semibold">{article.title}</h3>
+              <p className="text-sm text-gray-600 line-clamp-2">
+                {article.content}
+              </p>
+              <div className="text-sm text-gray-500">
+                {format(new Date(article.published_at || new Date()), "d MMMM yyyy", {
+                  locale: fr,
+                })}
               </div>
-              {userProfile?.is_admin && (
-                <div className="flex space-x-2 ml-4">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleTogglePublish(article.id, article.is_published)}
-                  >
-                    {article.is_published ? (
-                      <Check className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <X className="h-4 w-4 text-gray-400" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleEdit(article)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleDelete(article.id)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
             </div>
-          ))}
-        </div>
-      )}
+            {userProfile?.is_admin && (
+              <div className="flex space-x-2 ml-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleTogglePublish(article.id, article.is_published)}
+                >
+                  {article.is_published ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <X className="h-4 w-4 text-gray-400" />
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleEdit(article)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleDelete(article.id)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
