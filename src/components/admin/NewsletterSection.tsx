@@ -20,6 +20,21 @@ export const NewsletterSection = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  const { data: userProfile } = useQuery({
+    queryKey: ["user-profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const { data: articles } = useQuery({
     queryKey: ["admin-newsletter-articles"],
     queryFn: async () => {
@@ -37,6 +52,15 @@ export const NewsletterSection = () => {
       toast({
         title: "Erreur",
         description: "Vous devez être connecté pour créer un article.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!userProfile?.is_admin) {
+      toast({
+        title: "Erreur",
+        description: "Vous devez être administrateur pour créer un article.",
         variant: "destructive",
       });
       return;
@@ -174,13 +198,15 @@ export const NewsletterSection = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Articles de la newsletter</h2>
-        <Button onClick={() => setIsCreating(true)} disabled={isCreating}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvel article
-        </Button>
+        {userProfile?.is_admin && (
+          <Button onClick={() => setIsCreating(true)} disabled={isCreating}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvel article
+          </Button>
+        )}
       </div>
 
-      {(isCreating || editingId) && (
+      {(isCreating || editingId) && userProfile?.is_admin && (
         <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
           <Input
             placeholder="Titre de l'article"
@@ -243,33 +269,35 @@ export const NewsletterSection = () => {
                 })}
               </div>
             </div>
-            <div className="flex space-x-2 ml-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleTogglePublish(article.id, article.is_published)}
-              >
-                {article.is_published ? (
-                  <Check className="h-4 w-4 text-green-600" />
-                ) : (
-                  <X className="h-4 w-4 text-gray-400" />
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleEdit(article)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleDelete(article.id)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
+            {userProfile?.is_admin && (
+              <div className="flex space-x-2 ml-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleTogglePublish(article.id, article.is_published)}
+                >
+                  {article.is_published ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <X className="h-4 w-4 text-gray-400" />
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleEdit(article)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleDelete(article.id)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         ))}
       </div>
