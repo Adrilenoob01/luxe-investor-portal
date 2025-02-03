@@ -25,7 +25,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="container mx-auto px-0 md:px-4 py-16">
+      <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">WearShop Invest</h1>
           <p className="text-xl text-gray-600 mb-8">
@@ -102,6 +102,7 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Statistiques clés */}
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
