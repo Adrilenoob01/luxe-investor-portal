@@ -1,66 +1,57 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth"; // Assuming you have an auth hook
 
 export const Header = () => {
-  const [session, setSession] = useState(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
+  const { user, logout } = useAuth();
 
   return (
-    <header className="w-full border-b">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold gradient-text">WearShop Invest</span>
-        </Link>
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-secondary-foreground hover:text-primary transition-colors">
-            Accueil
-          </Link>
-          <Link to="/orders" className="text-secondary-foreground hover:text-primary transition-colors">
-            Commandes
-          </Link>
-          <Link to="/about" className="text-secondary-foreground hover:text-primary transition-colors">
-            À propos
-          </Link>
-        </nav>
-        <div className="flex items-center space-x-4">
-          {session ? (
-            <>
-              <Link to="/dashboard">
-                <Button variant="outline">Mon compte</Button>
+    <header className="bg-white shadow-sm">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <Link to="/" className="flex items-center">
+              <span className="text-xl font-bold">Logo</span>
+            </Link>
+            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <Link
+                to="/"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
+              >
+                Accueil
               </Link>
-              <Button onClick={handleLogout}>Déconnexion</Button>
-            </>
-          ) : (
-            <>
-              <Link to="/login">
-                <Button variant="outline">Connexion</Button>
+              <Link
+                to="/about"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
+              >
+                À propos
               </Link>
-              <Link to="/register">
-                <Button>S'inscrire</Button>
+              <Link
+                to="/newsletter"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
+              >
+                Newsletter
               </Link>
-            </>
-          )}
+            </div>
+          </div>
+          <div className="flex items-center">
+            {user ? (
+              <button
+                onClick={logout}
+                className="text-sm font-medium text-gray-500 hover:text-gray-900"
+              >
+                Déconnexion
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="text-sm font-medium text-gray-500 hover:text-gray-900"
+              >
+                Connexion
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
+      </nav>
     </header>
   );
 };

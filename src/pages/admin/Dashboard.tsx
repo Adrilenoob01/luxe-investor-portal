@@ -10,13 +10,14 @@ import { CreateOrderDialog } from "@/components/admin/CreateOrderDialog";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { TabNavigation } from "@/components/admin/TabNavigation";
 import { EmailSection } from "@/components/admin/EmailSection";
+import { NewsletterSection } from "@/components/admin/NewsletterSection";
 import { Profile } from "@/types/profile";
 import { OrderProject } from "@/types/order-project";
 import { Investment, Withdrawal } from "@/types/transaction";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'users' | 'packs' | 'transactions' | 'email'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'packs' | 'transactions' | 'email' | 'newsletter'>('users');
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
@@ -125,6 +126,7 @@ const AdminDashboard = () => {
             { id: 'packs', label: 'Packs' },
             { id: 'transactions', label: 'Transactions' },
             { id: 'email', label: 'Email' },
+            { id: 'newsletter', label: 'Newsletter' },
           ]}
         />
 
@@ -157,6 +159,10 @@ const AdminDashboard = () => {
 
           {activeTab === 'email' && (
             <EmailSection />
+          )}
+
+          {activeTab === 'newsletter' && (
+            <NewsletterSection />
           )}
         </div>
       </div>
