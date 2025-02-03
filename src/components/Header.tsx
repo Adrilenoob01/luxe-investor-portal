@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth"; // Assuming you have an auth hook
+import { useAuth } from "@/hooks/useAuth";
 
 export const Header = () => {
   const { user, logout } = useAuth();
