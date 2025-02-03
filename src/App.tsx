@@ -6,6 +6,7 @@ import Register from "./pages/auth/Register";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import Newsletter from "./pages/Newsletter";
+import Dashboard from "./pages/dashboard/Index";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/newsletter" element={<Newsletter />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
