@@ -8,6 +8,7 @@ import { Edit, Trash, Plus, Check, X } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export const NewsletterSection = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -17,6 +18,7 @@ export const NewsletterSection = () => {
   const [imageUrl, setImageUrl] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: articles } = useQuery({
     queryKey: ["admin-newsletter-articles"],
@@ -31,17 +33,29 @@ export const NewsletterSection = () => {
   });
 
   const handleCreate = async () => {
+    if (!user) {
+      toast({
+        title: "Erreur",
+        description: "Vous devez être connecté pour créer un article.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.from("newsletter_articles").insert([
         {
           title,
           content,
           image_url: imageUrl,
-          author_id: (await supabase.auth.getUser()).data.user?.id,
+          author_id: user.id,
         },
       ]);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating article:", error);
+        throw error;
+      }
 
       toast({
         title: "Article créé avec succès",
@@ -54,6 +68,7 @@ export const NewsletterSection = () => {
       setImageUrl("");
       queryClient.invalidateQueries({ queryKey: ["admin-newsletter-articles"] });
     } catch (error) {
+      console.error("Detailed error:", error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la création de l'article.",
