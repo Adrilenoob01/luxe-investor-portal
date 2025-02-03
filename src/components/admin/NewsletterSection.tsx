@@ -20,8 +20,7 @@ export const NewsletterSection = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Query to check if user is admin
-  const { data: userProfile, isLoading: isLoadingProfile } = useQuery({
+  const { data: userProfile } = useQuery({
     queryKey: ["user-profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -30,16 +29,13 @@ export const NewsletterSection = () => {
         .select("is_admin")
         .eq("id", user.id)
         .single();
-      if (error) {
-        console.error("Error fetching user profile:", error);
-        throw error;
-      }
+      if (error) throw error;
       return data;
     },
     enabled: !!user?.id,
   });
 
-  const { data: articles, isLoading: isLoadingArticles } = useQuery({
+  const { data: articles } = useQuery({
     queryKey: ["admin-newsletter-articles"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -198,21 +194,13 @@ export const NewsletterSection = () => {
     }
   };
 
-  if (isLoadingProfile || isLoadingArticles) {
-    return <div>Chargement...</div>;
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Articles de la newsletter</h2>
         {userProfile?.is_admin && (
-          <Button 
-            onClick={() => setIsCreating(true)} 
-            disabled={isCreating}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
+          <Button onClick={() => setIsCreating(true)} disabled={isCreating}>
+            <Plus className="w-4 h-4 mr-2" />
             Nouvel article
           </Button>
         )}
