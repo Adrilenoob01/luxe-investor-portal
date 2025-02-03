@@ -8,7 +8,6 @@ import { Edit, Trash, Plus, Check, X } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 
 export const NewsletterSection = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -18,22 +17,6 @@ export const NewsletterSection = () => {
   const [imageUrl, setImageUrl] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-
-  const { data: userProfile } = useQuery({
-    queryKey: ["user-profile", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", user.id)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
 
   const { data: articles } = useQuery({
     queryKey: ["admin-newsletter-articles"],
@@ -48,38 +31,17 @@ export const NewsletterSection = () => {
   });
 
   const handleCreate = async () => {
-    if (!user) {
-      toast({
-        title: "Erreur",
-        description: "Vous devez être connecté pour créer un article.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!userProfile?.is_admin) {
-      toast({
-        title: "Erreur",
-        description: "Vous devez être administrateur pour créer un article.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       const { error } = await supabase.from("newsletter_articles").insert([
         {
           title,
           content,
           image_url: imageUrl,
-          author_id: user.id,
+          author_id: (await supabase.auth.getUser()).data.user?.id,
         },
       ]);
 
-      if (error) {
-        console.error("Error creating article:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Article créé avec succès",
@@ -92,7 +54,6 @@ export const NewsletterSection = () => {
       setImageUrl("");
       queryClient.invalidateQueries({ queryKey: ["admin-newsletter-articles"] });
     } catch (error) {
-      console.error("Detailed error:", error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la création de l'article.",
@@ -198,15 +159,13 @@ export const NewsletterSection = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Articles de la newsletter</h2>
-        {userProfile?.is_admin && (
-          <Button onClick={() => setIsCreating(true)} disabled={isCreating}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvel article
-          </Button>
-        )}
+        <Button onClick={() => setIsCreating(true)} disabled={isCreating}>
+          <Plus className="w-4 h-4 mr-2" />
+          Nouvel article
+        </Button>
       </div>
 
-      {(isCreating || editingId) && userProfile?.is_admin && (
+      {(isCreating || editingId) && (
         <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
           <Input
             placeholder="Titre de l'article"
@@ -269,35 +228,33 @@ export const NewsletterSection = () => {
                 })}
               </div>
             </div>
-            {userProfile?.is_admin && (
-              <div className="flex space-x-2 ml-4">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleTogglePublish(article.id, article.is_published)}
-                >
-                  {article.is_published ? (
-                    <Check className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <X className="h-4 w-4 text-gray-400" />
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleEdit(article)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleDelete(article.id)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+            <div className="flex space-x-2 ml-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleTogglePublish(article.id, article.is_published)}
+              >
+                {article.is_published ? (
+                  <Check className="h-4 w-4 text-green-600" />
+                ) : (
+                  <X className="h-4 w-4 text-gray-400" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleEdit(article)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleDelete(article.id)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         ))}
       </div>
