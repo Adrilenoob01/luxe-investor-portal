@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth"; // Assuming you have an auth hook
+import { useAuth } from "@/hooks/useAuth";
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -24,12 +24,6 @@ export const Header = () => {
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
               >
                 À propos
-              </Link>
-              <Link
-                to="/newsletter"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-              >
-                Newsletter
               </Link>
             </div>
           </div>
