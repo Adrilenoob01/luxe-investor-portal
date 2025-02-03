@@ -24,7 +24,7 @@ export const NewsletterSection = () => {
       const { data, error } = await supabase
         .from("newsletter_articles")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("published_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -223,7 +223,7 @@ export const NewsletterSection = () => {
                 {article.content}
               </p>
               <div className="text-sm text-gray-500">
-                {format(new Date(article.created_at), "d MMMM yyyy", {
+                {format(new Date(article.published_at || new Date()), "d MMMM yyyy", {
                   locale: fr,
                 })}
               </div>
