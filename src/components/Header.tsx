@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { User, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -29,30 +31,33 @@ export const Header = () => {
               >
                 À propos
               </Link>
-              {user && (
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  Mon compte
-                </Link>
-              )}
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
             {user ? (
-              <button
-                onClick={logout}
-                className="text-sm font-medium text-gray-500 hover:text-gray-900"
-              >
-                Déconnexion
-              </button>
+              <>
+                <Link to="/dashboard">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Mon compte
+                  </Button>
+                </Link>
+                <Button
+                  onClick={logout}
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Déconnexion
+                </Button>
+              </>
             ) : (
-              <Link
-                to="/login"
-                className="text-sm font-medium text-gray-500 hover:text-gray-900"
-              >
-                Connexion
+              <Link to="/login">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Connexion
+                </Button>
               </Link>
             )}
           </div>
