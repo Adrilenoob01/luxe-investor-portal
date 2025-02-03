@@ -73,6 +73,7 @@ export type Database = {
           published_at: string | null
           title: string
           updated_at: string | null
+          created_at: string;
         }
         Insert: {
           author_id?: string | null
@@ -83,6 +84,7 @@ export type Database = {
           published_at?: string | null
           title: string
           updated_at?: string | null
+          created_at?: string;
         }
         Update: {
           author_id?: string | null
@@ -93,6 +95,7 @@ export type Database = {
           published_at?: string | null
           title?: string
           updated_at?: string | null
+          created_at?: string;
         }
         Relationships: [
           {
@@ -286,7 +289,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -340,10 +343,10 @@ export type TablesUpdate<
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
+      Update: infer U
+    }
+    ? U
+    : never
     : never
 
 export type Enums<
