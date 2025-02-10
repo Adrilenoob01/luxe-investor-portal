@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,8 +19,18 @@ export default function Payment() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
-    fetchPacks();
+    const initialize = async () => {
+      try {
+        await checkAuth();
+        await fetchPacks();
+      } catch (error) {
+        console.error('Error initializing payment page:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initialize();
     
     // Check for success or cancelled payment
     if (searchParams.get('success') === 'true') {
@@ -44,10 +55,9 @@ export default function Payment() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       toast.error("Vous devez être connecté pour investir");
-      navigate('/login', { replace: true });
-      return;
+      navigate('/login');
+      throw new Error("Not authenticated");
     }
-    setIsLoading(false);
   };
 
   const fetchPacks = async () => {
@@ -63,6 +73,7 @@ export default function Payment() {
     } catch (error) {
       console.error('Error fetching packs:', error);
       toast.error("Erreur lors du chargement des projets d'investissement");
+      throw error;
     }
   };
 
