@@ -1,20 +1,25 @@
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   // Check if user is already logged in
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_IN" && session) {
+      // Afficher un message de succès
+      toast.success("Connexion réussie !");
       navigate("/dashboard");
+    } else if (event === "SIGNED_OUT") {
+      // Rediriger vers la page de connexion si déconnecté
+      navigate("/login");
     }
   });
 
@@ -62,10 +67,27 @@ export default function Login() {
                 social_provider_text: 'Continuer avec {{provider}}',
                 link_text: "Vous n'avez pas de compte ? Inscrivez-vous",
               },
+              forgotten_password: {
+                email_label: 'Adresse email',
+                password_label: 'Mot de passe',
+                button_label: 'Envoyer les instructions',
+                loading_button_label: 'Envoi en cours...',
+                link_text: 'Mot de passe oublié ?',
+              },
             },
           }}
           theme="light"
           providers={[]}
+          onError={(error) => {
+            console.error('Erreur d\'authentification:', error);
+            if (error.message.includes('Invalid login credentials')) {
+              toast.error('Email ou mot de passe incorrect');
+            } else if (error.message.includes('Email not confirmed')) {
+              toast.error('Veuillez confirmer votre email avant de vous connecter');
+            } else {
+              toast.error('Une erreur est survenue lors de la connexion');
+            }
+          }}
         />
 
         <div className="text-center text-sm text-muted-foreground">
