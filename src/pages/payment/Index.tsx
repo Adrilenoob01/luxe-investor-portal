@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { OrderProject } from "@/types/supabase";
 import { PaymentForm } from "@/components/payment/PaymentForm";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Header } from "@/components/Header";
 
 export default function Payment() {
   const navigate = useNavigate();
@@ -99,21 +99,24 @@ export default function Payment() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <Card className="p-6">
-          <h1 className="text-2xl font-bold mb-6">Investir dans un projet</h1>
-          
-          <PaymentForm
-            packs={packs}
-            onPackSelect={handlePackSelect}
-            selectedPack={selectedPack}
-            amount={amount}
-            setAmount={setAmount}
-            isProcessing={isProcessing}
-            getRemainingAmount={getRemainingAmount}
-          />
-        </Card>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="py-12">
+        <div className="max-w-4xl mx-auto px-4">
+          <Card className="p-6">
+            <h1 className="text-2xl font-bold mb-6">Investir dans un projet</h1>
+            
+            <PaymentForm
+              packs={packs}
+              onPackSelect={handlePackSelect}
+              selectedPack={selectedPack}
+              amount={amount}
+              setAmount={setAmount}
+              isProcessing={isProcessing}
+              getRemainingAmount={getRemainingAmount}
+            />
+          </Card>
+        </div>
       </div>
     </div>
   );
