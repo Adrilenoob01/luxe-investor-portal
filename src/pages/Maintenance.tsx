@@ -23,8 +23,7 @@ export default function Maintenance() {
             situation dans les meilleurs délais. Nous vous remercions sincèrement pour votre patience, votre
             compréhension et la confiance que vous avez accordée à WearShop depuis le début de cette aventure. Dès que
             de nouvelles informations seront disponibles, une communication officielle sera publiée afin de vous tenir
-            informés de la suite des événements. 
-            Avec tout notre respect et notre gratitude, L’équipe WearShop</p>
+            informés de la suite des événements. Avec tout notre respect et notre gratitude, L’équipe WearShop
           </p>
 
           <div className="bg-muted/50 p-6 rounded-md">
