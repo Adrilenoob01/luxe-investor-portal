@@ -34,7 +34,7 @@ export default function Maintenance() {
           </div>
         </div>
 
-        <p className="mt-8 text-sm text-muted-foreground">© 2024 WearShop Invest. Tous droits réservés.</p>
+        <p className="mt-8 text-sm text-muted-foreground">© 2025 WearShop Invest. Tous droits réservés.</p>
       </div>
     </div>
   );
