@@ -11,7 +11,7 @@ import Payment from "./pages/payment/Index";
 import Maintenance from "./pages/Maintenance";
 
 // Mettez cette variable à true pour activer le mode maintenance
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 function App() {
   // Si le mode maintenance est activé, afficher la page de maintenance
